@@ -16,9 +16,7 @@ HTML의 `<h1> ~ <h6>` 태그와 유사하다.
 ##### \<h5> 태그
 ###### \<h6> 태그       
 
-
   
-
 ## 본문
 HTML의 \<p>와 같은 본문은 텍스트를 그대로 작성하면 된다.
 
@@ -99,13 +97,12 @@ Today I Learned
 1. Apache
 2. PHP
 3. MySQL
-  1. Database
+	1. Database
 ```
 1. Apache
 2. PHP
-3. MySQL
-  1. Database      
-    
+3. MySQL       
+	1. Database
   
 ### 코드블럭
 코드블럭은 일반 문장 사이에 단어, 짧은 문장 단위로 표현할 수 있는 방법과  
@@ -113,7 +110,7 @@ Today I Learned
   
 단어, 한 줄의 코드를 감싸는 경우 `를 앞뒤로 감싼다.  
 
-`프로그래밍 언어에는 \`Python\`과 \`JAVA\` 등이 있다.`
+```프로그래밍 언어에는 `Python`과 `JAVA` 등이 있다.```
 
 프로그래밍 언어에는 `Python`과 `JAVA` 등이 있다.  
 
@@ -125,7 +122,6 @@ Today I Learned
 for i in range(10) :
 	print(i)
 ```	    
-
 
 ### 수평선
 HTML의 \<hr>과 같이 동작한다.
@@ -144,16 +140,14 @@ HTML의 \<hr>과 같이 동작한다.
 ---------------
 
 
-
-
 ### 링크
+title은 생략 가능하다
 
-`[naver] (https://www.naver.com "naver")`
+`[naver](https://www.naver.com "title")`
 
-[naver] (https://www.naver.com "naver")
+[naver](https://www.naver.com "title")
     
 
-	
 
 ### 강조
 HTML의 \<em>과 같은 동작을 하는 `*`, `_`  
