@@ -46,4 +46,4 @@ id에 '||1#을 입력해주면 쿼리문이 참이 된다.
 ```
 select id from prob_gremlin where id='**'||1#**' and pw=''
 ```
-**$result['id']**에 값이 있어 문제가 풀린다.
+쿼리문이 위와 같이 되고, **$result['id']**에 값이 있어 문제가 풀린다.
