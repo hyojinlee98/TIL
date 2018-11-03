@@ -1,4 +1,3 @@
-
 ## GREMLIN Write-up
 
 ### 문제
