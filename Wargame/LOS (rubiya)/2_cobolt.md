@@ -1,4 +1,3 @@
-
 ## COBOLT Write-up
 
 ### 문제
