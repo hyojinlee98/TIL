@@ -42,7 +42,7 @@ $query = "select id from prob_gremlin where id='{$_GET[id]}' and pw='{$_GET[pw]}
 ```
 id에서 싱글쿼터 필터링을 안하는 점을 이용해 우회할 수 있다.
 id에 **'||1#** 을 입력해주면 쿼리문이 참이 된다.
-```
+``` php
 select id from prob_gremlin where id=''||1#' and pw=''
 ```
 쿼리문이 위와 같이 되고, **$result['id']** 에 값이 있어 문제가 풀린다.
