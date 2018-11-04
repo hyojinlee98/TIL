@@ -30,7 +30,6 @@ res = requests.get(url, params=data, cookies=session)
 if "Clear!" in res.text :
     print("[♪] GREMLIN Clear!")
 ```
-
 python으로 HTTP 요청을 보내 응답을 받기 위해 requests 모듈을 사용했다.
 ``` php
 if(preg_match('/prob|_|\.|\(\)/i', $_GET[id])) exit("No Hack ~_~");
