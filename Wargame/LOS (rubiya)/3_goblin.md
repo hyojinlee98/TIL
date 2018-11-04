@@ -36,7 +36,7 @@ no=1을 주면 **Hello guest** 가 뜬다.
 
 no에 **0||no<>1**를 넣어주면 쿼리는 다음과 같이 된다.
 ``` php
-**select id from prob_goblin where id='guest' and no=0||no<>1**
+select id from prob_goblin where id='guest' and no=0||no<>1
 ```
-mysql에서 **<>** 기호는 같지 않다는 의미이기 때문에 no!=1과 같은 의미가 된다.
+mysql에서 **<>** 기호는 같지 않다는 의미이기 때문에 no!=1과 같은 의미가 된다.  
 **$result['id']** 에 guest가 아닌 값, admin이 있기 때문에 문제가 해결된다.
