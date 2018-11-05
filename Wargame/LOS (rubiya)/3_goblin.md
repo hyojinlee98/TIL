@@ -32,7 +32,11 @@ if "Clear" in res.text :
     print("[♪] GOBLIN Clear!")
 ```
 
+이번 문제는 get으로 no를 받는다.  
+no=1을 주면 **Hello guest** 가 뜬다.
+이를 통해 guest가 1이라는 것을 알 수 있었고, no가 1이 아니면 풀릴 듯 했다.
 
+no에 **0||no<>1**을 넣어주면 쿼리는 다음과 같이 된다.
 
 ``` php
 select id from prob_goblin where id='guest' and no=0||no<>1
