@@ -15,7 +15,6 @@
   highlight_file(__FILE__);
 ?>
 ```
-
 ### Exploit 코드
 ``` python
 import requests
