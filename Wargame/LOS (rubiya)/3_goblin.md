@@ -15,6 +15,7 @@ if($result['id']) echo "<h2>Hello {$result[id]}</h2>";
 if($result['id'] == 'admin') solve("goblin");  
 highlight_file(__FILE__);  
 ?>
+
 ```
 ### Exploit 코드
 ``` python
@@ -41,4 +42,4 @@ no에 **0||no<>1**을 넣어주면 쿼리는 다음과 같이 된다.
 select id from prob_goblin where id='guest' and no=0||no<>1
 ```
 mysql에서 **<>** 기호는 같지 않다는 의미이기 때문에 **no!=1** 과 같은 의미가 된다.  
-**$result['id']** 에 guest가 아닌 값, admin이 있기 때문에 문제가 해결된다.
+**$result['id']** 에 guest가 아닌 다른 값, admin이 있기 때문에 문제가 해결된다.
