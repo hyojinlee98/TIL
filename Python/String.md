@@ -32,6 +32,7 @@ while i < len(numStr) :
     print(heartStr)
     i += 1
 ```
+
 #### Output
 ```	
 숫자를 여러 개 입력하세요 : 12598
@@ -42,4 +43,3 @@ while i < len(numStr) :
 ♥♥♥♥♥♥♥♥♥
 ♥♥♥♥♥♥♥♥
 ```
-
