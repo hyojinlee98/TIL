@@ -74,6 +74,8 @@ public class GreatDemo {
 		System.out.print("저장할까요?(저장 : Y, 취소 : N) ");
 		if (s.next().equals("Y"))
 			greatList.add(g);
+		else 
+			Great.Count--;
 	}
 	Scanner fileOpen(String filename) {
 		Scanner s = null;
