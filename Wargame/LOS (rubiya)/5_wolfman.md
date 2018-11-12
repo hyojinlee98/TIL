@@ -31,8 +31,7 @@ if "Clear" in res.text :
     print("[♪] WOLFMAN Clear!")
 ```
 이번 문제는 id가 admin이면 풀리는 문제이다.  
-쿼리문을 보면 이미 `id='guest'`로 되어있는데 이를 우회하면 된다.
-공백이 필터링 되어 있으니 공백 없이 쓰면 된다.  
+쿼리문을 보면 `id='guest'`로 되어있고, 공백이 필터링 되어 있으므로 공백없이 이를 우회하면 된다.   
 GET 방식으로 전송되는 pw에 `'||id='admin`을 넣어주면 쿼리문은 아래와 같이 된다.
 ``` php
 select id from prob_wolfman where id='guest' and pw=''||id='admin'
