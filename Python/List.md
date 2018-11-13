@@ -1,3 +1,4 @@
+
 ## [Python] 리스트
 
 ### 사용 방법
@@ -145,3 +146,68 @@
 >>> a
 [10, [200, 201], 30]
 ```
+
+
+### 스택 구현
+비어있는 위치를 top이라 칭한다.  
+아래 코드는 자동차가 5대까지 들어갈 수 있지만 입구가 하나인 주차장이다.
+``` python
+parking = []
+top, carName, outCar = 0, "A", ""
+select = 0
+
+while (select != 3) :
+    select = int(input("<1> 자동차 넣기 <2> 자동차 빼기 <3> 끝 : "))
+    if select == 1 :
+        if top >= 5 :
+            print("주차장이 꽉 차서 못들어감")
+        else :
+            parking.append(carName)
+            print("%s 자동차 들어감. 주차장 상태 ==> %s" % (parking[top], parking))
+            top += 1
+            carName = chr(ord(carName)+1)
+    elif select == 2 :
+        if top <= 0 :
+            print("빠져나갈 자동차가 없음")
+        else :
+            outCar = parking.pop()
+            print("%s 자동차 나감. 주차장 상태 ==> %s" % (outCar, parking))
+            top -= 1
+            carName = chr(ord(carName)-1)
+    elif select == 3 :
+        break
+    else :
+        print("잘못 입력했네요. 다시 입력하세요.")
+    print()
+
+print("현재 주차장에 %d 대가 있음" % top)
+print("프로그램을 종료합니다.")
+```
+
+
+### 2차원 리스트
+2차원 배열이라고 보면 된다.
+``` python
+list1 = []
+list2 = []
+value = 1
+
+for i in range(0, 3) :
+    for k in range(0, 4) :
+        list1.append(value)
+        value += 1
+    list2.append(list1)
+    list1 = []
+
+for i in range(0, 3) :
+    for k in range(0, 4) :
+        print("%3d" % list2[i][k], end=" ")
+    print()
+```
+
+#### Output
+``` python
+  1   2   3   4 
+  5   6   7   8 
+  9  10  11  12 
+  ```
