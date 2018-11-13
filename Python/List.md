@@ -149,15 +149,18 @@
 
 
 ### 스택 구현
-비어있는 위치를 top이라 칭한다.  
+
 아래 코드는 자동차가 5대까지 들어갈 수 있지만 입구가 하나인 주차장이다.
 ``` python
+## 변수 선언
 parking = []
-top, carName, outCar = 0, "A", ""
+top, carName, outCar = 0, "A", ""  # 비어있는 위치를 top이라 칭한다.  
 select = 0
 
+## 메인 코드
 while (select != 3) :
     select = int(input("<1> 자동차 넣기 <2> 자동차 빼기 <3> 끝 : "))
+	## push 기능
     if select == 1 :
         if top >= 5 :
             print("주차장이 꽉 차서 못들어감")
@@ -166,6 +169,7 @@ while (select != 3) :
             print("%s 자동차 들어감. 주차장 상태 ==> %s" % (parking[top], parking))
             top += 1
             carName = chr(ord(carName)+1)
+	## pop 기능
     elif select == 2 :
         if top <= 0 :
             print("빠져나갈 자동차가 없음")
@@ -186,7 +190,7 @@ print("프로그램을 종료합니다.")
 
 
 ### 2차원 리스트
-2차원 배열이라고 보면 된다.
+다른 프로그래밍 언어의 2차원 배열이라고 보면 된다.  
 ``` python
 list1 = []
 list2 = []
