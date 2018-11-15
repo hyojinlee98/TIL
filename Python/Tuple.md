@@ -62,4 +62,5 @@ Traceback (most recent call last):
     del(t[0])
 TypeError: 'tuple' object doesn't support item deletion
 ```
-값을 수정하거나 삭제를 시도하면 오류가 나는 것을 볼 수 있다.
+값을 수정하거나 삭제를 시도하면 오류가 나는 것을 볼 수 있다.  
+따라서 값의 수정과 삭제는 불가능하다.
