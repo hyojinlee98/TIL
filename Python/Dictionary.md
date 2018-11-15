@@ -1,3 +1,4 @@
+
 # [Python] 딕셔너리 (Dictionary)
 
 ### 딕셔너리란?
@@ -68,7 +69,15 @@ Key가 '바나나' 이고, Value가 'banana'인 딕셔너리 쌍이 추가되고
 >>> dic = {'사과' : 'apple', '복숭아' : 'peach', '바나나' : 'banana'}
 >>> dic['사과']
 'apple'
+>>> dic['귤']
+Traceback (most recent call last):
+  File "<pyshell#19>", line 1, in <module>
+    dic['귤']
+KeyError: '귤'
+>>> dic.get('귤')
 ```
+딕셔너리에 존재하는 키라면 해당 값을 반환하지만 없을 경우 에러가 난다.  
+이는 **get(key)** 함수를 사용하면 된다.
 
 ### 딕셔너리 관련 함수들
 keys(), values(), items(), clear(), get() 등과 같이 딕셔너리를 다루는 다양한 함수들이 존재한다.
@@ -102,6 +111,17 @@ values() 함수를 호출하면 dict_values 객체가 리턴된다.
 dict_items([('사과', 'apple'), ('복숭아', 'peach'), ('바나나', 'banana')])
 ```
 items() 함수는 Key와 Value의 쌍을 튜플로 묶은 값을 dict_items 객체로 리턴한다.
+
+#### 리스트 형태로 반환하기
+``` python
+>>> list(dic.keys())
+['사과', '복숭아', '바나나']
+>>> list(dic.values())
+['apple', 'peach', 'banana']
+>>> list(dic.items())
+[('사과', 'apple'), ('복숭아', 'peach'), ('바나나', 'banana')]
+```
+위의 함수의 결과에서 `dict_keys` `dict_values` `dict_items`를 뺀 리스트 형태로 반환된다.
 
 #### Key:Value 쌍 모두 지우기
 ``` python 
@@ -138,3 +158,44 @@ False
 ```
 '사과'라는 문자열은 딕셔너리 dic의 Key 중 하나이기 때문에 'name' in dic의 결과값은 참(True)이다. 
 반대로 '배'는 딕셔너리 dic 안에 존재하지 않는 Key 이므로 거짓(False)를 리턴한다.
+
+#### 예시 코드
+``` python
+foods = {   "떡볶이" : "오뎅",
+            "짜장면" : "단무지",
+            "라면" : "김치",
+            "피자" : "피클",
+            "맥주" : "땅콩",
+            "치킨" : "치킨무",
+            "삼겹살" : "상추" }
+
+print(foods.get("만두"))
+print(foods.get("만두", "그런 음식은 없네요"))
+
+
+while (True) :
+    myfood = input(str(list(foods.keys())) + " 중 좋아하는 것은? ")
+    if myfood in foods :
+        print("<%s> 궁합 음식은 <%s> 입니다." %(myfood, foods.get(myfood)))
+    elif myfood == "끝" :
+        break
+    else :
+        print("그런 음식이 없네요. 확인해 보세요.")
+    print()
+```
+
+#### Output
+``` python
+None
+그런 음식은 없네요
+['떡볶이', '짜장면', '라면', '피자', '맥주', '치킨', '삼겹살'] 중 좋아하는 것은? 맥주
+<맥주> 궁합 음식은 <땅콩> 입니다.
+
+['떡볶이', '짜장면', '라면', '피자', '맥주', '치킨', '삼겹살'] 중 좋아하는 것은? 떡볶이
+<떡볶이> 궁합 음식은 <오뎅> 입니다.
+
+['떡볶이', '짜장면', '라면', '피자', '맥주', '치킨', '삼겹살'] 중 좋아하는 것은? 닭발
+그런 음식이 없네요. 확인해 보세요.
+
+['떡볶이', '짜장면', '라면', '피자', '맥주', '치킨', '삼겹살'] 중 좋아하는 것은? 끝
+```
