@@ -31,6 +31,6 @@ res = requests.get(url, cookies=cookies, params=params)
 if "Clear" in res.text :
     print("[♪] TROLL Clear")
 ```
-이번 문제는 id가 admin이면 문제가 풀리는데 admin이 필터링 되어 있다.
-MySQL은 대소문자를 구분하지 않는다는 특징이 있다. 
-따라서 `admin`과 `Admin`은 같은 문자열로 보기 때문에 이를 이용하면 문제가 풀린다.
+이번 문제는 id가 admin이면 문제가 풀리는데 admin이 필터링 되어 있다.  
+MySQL은 대소문자를 구분하지 않는다는 특징이 있다.  
+따라서 `admin`과 `Admin`을 같은 문자열로 보기 때문에 이를 이용하면 문제가 풀린다.
