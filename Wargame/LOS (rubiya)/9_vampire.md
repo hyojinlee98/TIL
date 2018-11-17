@@ -32,6 +32,7 @@ res = requests.get(url, cookies=cookies, params=params)
 if "Clear" in res.text :
     print("[♪] VAMPIRE Clear")
 ```
-이번 문제는 id가 admin이면 문제가 풀리는데 **str_replace**를 이용해 admin을 빈 값으로 바꾼다.  
+이번 문제는 id가 admin이면 문제가 풀리는데 **str_replace()** 메소드를 이용해 admin을 빈 값으로 바꾼다.
+str_replace() 메소드는 문자열을 삭제하는 방식으로 필터링 되어 있을 경우 우회가 가능하다.  
 **adm`admin`in**과 같이 admin 단어 사이에 admin을 넣으면 `admin`이 빈 값으로 바뀌고, 
 **admin**이 되어 문제가 해결된다.
