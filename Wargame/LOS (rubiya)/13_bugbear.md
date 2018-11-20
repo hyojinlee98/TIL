@@ -1,4 +1,4 @@
-## Darkknight Write-up
+## Bugbear Write-up
 
 ### 문제
 ``` php
@@ -66,3 +66,5 @@ admin의 pw를 알아내야 문제가 풀린다.
 이번 문제에서는 `substr` `ascii` `or` `like` `0x` 가 필터링 되어 있다.
 ascii와 or이 막혀 있어 ord도 사용 못한다.
 따라서 hex 값으로 변경해서 비교했다.
+hex의 바이너리를 저장해서 그 값을 10진수로 바꾼 뒤 문자로 변환한다.
+이렇게 플래그를 얻을 수 있다.
