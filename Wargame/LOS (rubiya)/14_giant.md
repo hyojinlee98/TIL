@@ -25,7 +25,7 @@ import requests
 url = 'https://los.rubiya.kr/giant_18a08c3be1d1753de0cb157703f75a5e.php'
 cookies = {'PHPSESSID' : 'My PHPSESSID'}
 params = {}
-params['shit'] = chr(0x0b)
+params['shit'] = chr(0x0b) # 수직탭(%0b), 다음 페이지(%0c) 사용 가능
 
 res = requests.get(url, cookies=cookies, params=params)
 
