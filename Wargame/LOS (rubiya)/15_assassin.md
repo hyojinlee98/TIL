@@ -1,5 +1,3 @@
-
-
 ## Darkknight Write-up
 
 ### 문제
@@ -39,5 +37,5 @@ for i in range(48, 127) :
     if boolean==False :
         break
 ```
-이번 문제는 like 뒤에 값을 통해 admin의 pw를 찾아야 한다.  
+이번 문제는 like를 통해 admin의 pw를 찾아야 한다.  
 pw가 무엇인지 모르기 때문에 %% 사이에 값을 넣어 admin을 찾아내면 된다.
