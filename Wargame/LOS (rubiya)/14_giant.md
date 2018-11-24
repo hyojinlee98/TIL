@@ -1,6 +1,4 @@
-
-
-## Darkknight Write-up
+## Giant Write-up
 
 ### 문제
 ``` php
@@ -34,7 +32,7 @@ if "Clear" in res.text :
 ```
 이번 문제는 공백 우회를 해야한다.  
 공백 우회하는 방법에는 다음이 있다.
-- 괄호 `()`
+- 괄호 `()`
 - 주석 `/**/`
 - 더하기 `+`
 - 수평탭(Horizontal Tab) `%09`
