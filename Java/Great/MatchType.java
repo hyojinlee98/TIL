@@ -1,11 +1,11 @@
 package great;
 
 public enum MatchType {
-	None(0, "¾øÀ½"),
-	Name(1, "ÀÌ¸§"),
-	Gender(2, "¼ºº°"),
-	Year(3, "³âµµ"),
-	Achieved(4, "¾÷Àû");
+	None(0, "ì—†ìŒ"),
+	Name(1, "ì´ë¦„"),
+	Gender(2, "ì„±ë³„"),
+	Year(3, "ë…„ë„"),
+	Achieved(4, "ì—…ì ");
 	int num;
 	String value;
 	MatchType(int n, String s) {
