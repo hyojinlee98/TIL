@@ -33,4 +33,36 @@ print("100과 200의 plus() 함수 결과는 %d" % hap)
 100과 200의 plus() 함수 결과는 300
 ```
 인자 두개를 전달하며 호출하면 된다.
+함수를 이용해 간단한 계산기를 만들어 볼 수 있다.
+
+### 계산기
+``` python
+## 함수 정의 부분
+def calc(v1, v2, op) :
+    if op == '+' :
+        result = v1 + v2
+    elif op == '-' :
+        result = v1 - v2
+    elif op == '*' :
+        result = v1 * v2
+    elif op == '/' :
+        result = v1 / v2
+    return result
+
+## 메인 코드 부분
+var1 = int(input("첫번째 숫자 입력 : "))
+op = input('계산 입력 ( +, -, *, / ) : ')
+var2 = int(input("두번째 숫자 입력 : "))
+
+res = calc(var1, var2, op)
+print("## 계산기 : %d %s %d = %d" % (var1, op, var2, res))
+```
+
+#### Output
+```
+첫번째 숫자 입력 : 10
+계산 입력 ( +, -, *, / ) : +
+두번째 숫자 입력 : 5
+## 계산기 : 10 + 5 = 15
+```
 
