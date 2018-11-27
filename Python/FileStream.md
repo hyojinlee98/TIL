@@ -1,5 +1,8 @@
-## [Python] 파일입출력
+## [Python] 파일 입출력
+파이썬으로 파일의 내용을 읽어 오거나 파일에 글을 쓸 수 있다.
 
+
+### 파일 입출력으로 실행 파일 복사하기
 ``` python
 inFp = open('C:/Windows/write.exe', 'rb')
 outFp = open("./txt/write.exe", "wb")
