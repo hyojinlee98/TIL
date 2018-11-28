@@ -7,6 +7,43 @@
 - readline()
 - readlines()
 
+### 파일 입력 예시
+``` python
+inFp = open("./txt/data1.txt", "r", encoding='utf-8')
+
+inList = inFp.readlines()
+for inStr in inList :
+    print(inStr, end="")
+
+inFp.close()
+```
+읽기 형식으로 파일을 열고, 한줄씩 리스트 형식으로 반환된 값을 한 줄씩 출력한다.
+ #### Output
+ ```
+ 파이썬 파일 입출력
+ t0paz & g0pher
+ 종강 했으면 좋겠다
+ ```
+ data1.txt 파일에 있는 내용이 출력된다.
+
+### 도스의 type 명령 구현하기
+도스의 명령어 중 하나인 `type 파일명` 은 파일의 내용을 출력해준다.
+이를 구현하면 다음과 같다.
+``` python
+import os
+
+fName = input("파일명을 입력하세요 : ")
+if os.path.exists("./txt/"+fName) :
+    inFp = open("./txt/"+fName, "r", encoding='utf-8')
+    inList = inFp.readlines()
+    for inStr in inList :
+        print(inStr, end="")
+    inFp.close()
+else :
+    print("%s 파일이 없습니다" % fName)
+```
+파일명을 입력했을 때 파일이 있으면 해당 파일의 내용을 출력하고, 파일명이 없으면 없다고 출력해준다.
+
 ### 파일 출력 관련 함수
 - write()
 - writelines()
