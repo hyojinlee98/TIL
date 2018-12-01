@@ -1,11 +1,12 @@
 ## [Python] random 모듈 사용법(난수 생성)
-파이썬에서 난수를 만들기 위해서는 random 모듈을 사용해야 한다. 
+파이썬에서 난수를 만들기 위해서는 random 모듈을 사용해야 한다.   
 random 모듈 사용 방법은 다음과 같다.
 ``` python
 >>> import random
 >>> random.random()
 0.9532140704594995
 ```
+random() 범위는 0.0 이상 1.0 미만의 실수이다.
 우선 random 모듈의 관련 함수들을 사용하기 위해서는 import 해줘야 한다.
 ``` python
 import python
