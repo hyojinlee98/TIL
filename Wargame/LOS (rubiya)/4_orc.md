@@ -63,7 +63,8 @@ if req(flag) :
     print("\n[♪] ORC Clear")
 ```
 
-이번 문제는 pw가 무엇인지 알아내야 한다.
+이번 문제는 admin의 pw가 무엇인지 알아내야 한다.  
+쿼리의 조건이 참이면 Hello admin 문구가 뜰 것이다. 이것으로 참 거짓을 판별해 Blind SQL Injection을 하면 된다.
 ``` php
 if(preg_match('/prob|_|\.|\(\)/i', $_GET[pw])) exit("No Hack ~_~");
 ```
