@@ -75,6 +75,29 @@ data1.txt란 이름의 파일에 입력한 내용이 써진다.
 만약 data1.txt란 파일이 있으면 덮어 써진다.  
 파일 열기 모드가 w가 아닌 a라면 기존 내용에 추가된다.
 
+### 파일 입출력으로 파일 복사하기
+``` python
+inFp, outFp = None, None
+inStr = ""
+
+inFp = open('./txt/data2.txt', 'r', encoding='utf-8')
+outFp = open('./txt/data2_copy.txt', 'w', encoding='utf-8')
+
+inList = inFp.readlines()
+for inStr in inList :
+    outFp.writelines(inStr)
+
+inFp.close()
+outFp.close()
+print("--- 정상적으로 파일이 복사되었음 ---")
+```
+
+#### Output
+```
+--- 정상적으로 파일이 복사되었음 ---
+```
+해당 경로에 data2_copy.txt 파일에 data2.txt 파일이 복사된다.
+
 ### 파일 입출력으로 실행 파일 복사하기
 ``` python
 inFp = open('C:/Windows/write.exe', 'rb')
