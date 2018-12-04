@@ -119,4 +119,55 @@ print("--- 정상적으로 바이너리 파일이 복사되었습니다 ---")
 --- 정상적으로 파일이 복사되었음 ---
 ```
 
-해당 경로에 write.exe 파일이 생기고 실행도 된다.  
+해당 경로에 write.exe 파일이 생기고 실행도 된다.
+
+### 파일 암호화 및 복호화 프로그램
+``` python
+## 변수 선언
+inFp, outFp = None, None
+inStr, outStr = "", ""
+i = 0
+secu = 0
+
+## 메인 코드 부분
+secuYn = input("1. 암호화 2. 암호해석 중 선택 : ")
+inFname = input("입력 파일명을 입력하세요 : ")
+outFname = input("출력 파일명을 입력하세요 : ")
+
+if secuYn == "1" :
+    secu = 100
+elif secuYn == "2" :
+    secu = -100
+
+inFp = open('./txt/'+inFname, 'r', encoding='utf-8')
+outFp = open('./txt/'+outFname, 'w', encoding='utf-8')
+
+while True :
+    inStr = inFp.readline()
+    if not inStr :
+        break
+    outStr = ""
+    for i in range(0, len(inStr)) :
+        ch = inStr[i]
+        chNum = ord(ch)
+        chNum += secu
+        ch2 = chr(chNum)
+        outStr += ch2
+    outFp.write(outStr)
+
+outFp.close()
+inFp.close()
+print("%s --> %s 변환 완료" % (inFname, outFname))
+```
+
+#### Output
+```
+1. 암호화 2. 암호해석 중 선택 : 1
+입력 파일명을 입력하세요 : test.txt
+출력 파일명을 입력하세요 : test_encrypt.txt
+test.txt --> test_encrypt.txt 변환 완료
+```
+test_encrypt.txt에 있는 내용
+```
+｣검쟜졹뵘럤섘얨쟬닸검쟜옴굤헀졹뵘룀솀솕뫩쥠뱠땕룁볬횜뱳왥섥땕잨툙햼왐검쟜잨얰얨뵠쉼쟬닸졹뵘험덝졹뵘먰잠룀닸팝졹검쟜잨얰얨뵠쉼옪뎸럠됨덈맜졹뵘욤싡곰괔헍햼왐얰얨뵠쉼쟬닸곧잨푐헌헀덈맠먴헀덈
+```
