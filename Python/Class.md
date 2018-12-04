@@ -1,5 +1,4 @@
 ## [Python] 클래스
-### 클래스
 파이썬은 객체 지향 언어의 종류 중 하나이다. 객체(Object)란 주변에 존재하는 모든 사물, 생명체를 의미한다. 이때 객체를 정의하는 틀 또는 설계도를 클래스라고 한다. 클래스는 객체의 상태를 나타내는 변수와 객체의 행동을 나타내는 함수로 구성된다.  
 파이썬에서 클래스는 아래와 같은 방식으로 사용된다.
 ``` python
@@ -52,7 +51,7 @@ myCar1.upSpeed(30)
 자동차3의 색상은 노란색이며, 현재 속도는 0 km 입니다.
 ```
 
-### 생성자
+## 생성자
 생성자는 객체를 생성할 때 호출되는 메소드이다.  
 ``` python
 def __init__(self) :
@@ -107,7 +106,7 @@ print("자동차2의 색상은 %s이며, 현재 속도는 %d km 입니다."
 자동차2의 색상은 파랑이며, 현재 속도는 30 km 입니다.
 ```
 
-### 클래스 변수
+## 클래스 변수
 위에서 볼 수 있듯이 객체변수는 다른 객체들에 의해 영향받지 않고 독립적으로 그 값을 유지한다. 객체변수와 다르게 클래스 변수는 모든 객체들이 같은 값을 가리키고 있다.
 ``` python
 >>> class Car :
@@ -157,4 +156,89 @@ print("%s색 자동차의 현재 속도는 %d km, 생산된 자동차 숫자는 
 ```
 빨강색 자동차의 현재 속도는 30 km, 생산된 자동차 숫자는 총 1대 입니다
 파랑색 자동차의 현재 속도는 60 km, 생산된 자동차 숫자는 총 2대 입니다
+```
+## 상속
+상속(Inheritance)이란 "물려받다"라는 뜻으로, "재산을 상속받다"라고 할 때의 상속과 같은 의미이다. 클래스에도 이런 개념을 적용할 수가 있다. 어떤 클래스를 만들 때 다른 클래스의 기능을 물려받을 수 있게 만드는 것이다. 사용 방법은 다음과 같다.
+``` python
+class 서브 클래스(슈퍼 클래스) :
+```
+괄호 안에 상속할 클래스 명을 써주면 된다.  
+``` python
+class Car :
+	speed = 0
+    def upSpeed(self, value) :
+        self.speed = self.speed + value
+    def downSpeed(self, value) :
+        self.speed = self.speed - value
+
+class Sedan(Car) :
+    seatNum = 0
+
+    def getSeatNum(self) :
+        return self.seatNum
+
+class Truck(Car) :
+    capacity = 0
+    def getCapacity(self) :
+        return self.capacity
+
+sedan1 = Sedan()
+truck1 = Truck()
+
+sedan1.upSpeed(100)
+truck1.upSpeed(80)
+
+sedan1.seatNum = 5
+truck1.capacity = 50
+
+
+print("승용차의 속도는 %d km, 좌석수는 %d개 입니다."
+      % (sedan1.speed, sedan1.getSeatNum()))
+print("트럭의 속도는 %d km, 총중량은 %d 톤입니다."
+      % (truck1.speed, truck1.getCapacity()))
+```
+위의 코드는 Sedan 클래스와 Truck 클래스가 Car 클래스를 상속받았다. 각 클래스에서 Car 클래스의 메소드인 upSpeed를 사용할 수 있음을 볼 수 있다.
+
+#### Output
+```
+승용차의 속도는 100 km, 좌석수는 5개 입니다.
+트럭의 속도는 80 km, 총중량은 50 톤입니다.
+```
+
+### 메소드 오버라이딩
+메소드 오버라이딩이란 상위 클래스의 메소드를 하위 클래스에서 재정의하는 것을 의미한다.
+``` python
+class Car :
+    speed = 0
+    def upSpeed(self, value) :
+        self.speed += value
+
+        print("현재 속도(슈퍼 클래스) : %d" % self.speed)
+
+class Sedan(Car) :
+    def upSpeed(self, value) :
+        self.speed += value
+
+        if self.speed > 150 :
+            self.speed = 150
+
+        print("현재 속도(서브 클래스) : %d" % self.speed)
+
+class Truck(Car) :
+    pass
+
+truck1 = Truck()
+sedan1 = Sedan()
+
+print("트럭 --> ", end='')
+truck1.upSpeed(200)
+
+print("승용차 --> ", end='')
+sedan1.upSpeed(200)
+```
+Sedan의 경우 속도가 150 넘어가지 않도록 upSpeed 메소드를 재정의 하였다. truck1과 sedan1 모두 upSpeed 메소드를 호출할 때 인자를 200으로 전달했지만 truck1은 200, sedan1은 150인 것을 볼 수 있다.
+#### Output
+```
+트럭 --> 현재 속도(슈퍼 클래스) : 200
+승용차 --> 현재 속도(서브 클래스) : 150
 ```
