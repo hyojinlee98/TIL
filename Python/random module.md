@@ -14,7 +14,7 @@ random() 범위는 0.0 이상 1.0 미만의 실수이다.
 위와 같은 방법으로 범위를 지정해줄 수 있다.  
 우선 random 모듈의 관련 함수들을 사용하기 위해서는 import 해줘야 한다.
 ``` python
-import python
+import random
 ```
 관련 함수는 아래와 같다.
 - random() : **0.0 이상 1.0 미만**의 실수(Float)를 반환
