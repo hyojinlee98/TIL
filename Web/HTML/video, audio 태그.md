@@ -15,7 +15,6 @@
 -   src : 파일  경로
 -   type : 파일  형식  유형  
     
-
 |Format|MIME-type  |
 |--|--|
 |mp4|video/mp4|
