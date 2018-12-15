@@ -89,7 +89,6 @@ window.mainloop()
 체크버튼을 누르거나 해제할 경우 chk 변수에 값이 들어오게 된다. int 값이 아닌 True, False로 조건을 걸어도 작동된다.
 
 #### Radio Button
-중복선택이 불가능한 체크버튼이 생성된다.
 ``` python
 from tkinter import *
 window = Tk()
@@ -120,3 +119,13 @@ button1.pack(padx=50, pady=10)
 
 window.mainloop()
 ```
+중복선택이 불가능한 체크버튼이 생성된다.
+
+종료버튼을 추가하려면 다음과 같은 코드를 추가하면 된다.
+``` python
+button1 = Button(window, text="파이썬 종료", fg="#888888", command=quit)
+
+button1.pack(pady=10)
+```
+위에서 pady란 상하 여백이다. 좌우 여백은 padx이다.
+
