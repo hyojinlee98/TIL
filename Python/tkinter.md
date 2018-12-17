@@ -52,6 +52,12 @@ window.mainloop()
 fg 속성은 글자 색을 나타낸다.
 fg 속성에 RGB 값을 넣어도 된다.  
 anchor의 속성은 방위값(S:남, E:동, W:서, N:북)을 통해 글자의 위치를 나타낸다. SE는 남동쪽이므로 오른쪽 아래에 위치하게 된다.
+``` python
+label1.pack()
+label2.pack()
+label3.pack()
+```
+윈도우 창에 표시할 위젯의 배치 속성을 설정할 수 있다. 위젯.pack() 형식으로 사용한다.
 
 #### Button
 ``` python
@@ -119,7 +125,7 @@ button1.pack(padx=50, pady=10)
 
 window.mainloop()
 ```
-중복선택이 불가능한 체크버튼이 생성된다. 눌린 버튼의 value 값이 전송되므로 1, 2, 3으로 비교하면 된다.
+중복선택이 불가능한 체크버튼이 생성된다.  눌린 버튼의 value 값이 전송되므로 1, 2, 3으로 비교하면 된다.
 
 종료버튼을 추가하려면 다음과 같은 코드를 추가하면 된다.
 ``` python
@@ -127,5 +133,5 @@ button1 = Button(window, text="파이썬 종료", fg="#888888", command=quit)
 
 button1.pack(pady=10)
 ```
-위에서 pady란 상하 여백이다. 좌우 여백은 padx이다.
+위에서 **pady**란 상하 여백이다. 좌우 여백은 **padx**이다.
 
