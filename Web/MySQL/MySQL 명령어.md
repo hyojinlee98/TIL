@@ -80,9 +80,16 @@ mysql> ALTER TABLE 테이블명 ADD 컬럼명 컬럼속성;
 ```
 
 ## LIKE 사용하여 검색
+`LIKE`를 이용하여 데이터베이스에서 특정 문자가 들어간 데이터나 특정 문자가 들어가지 않은 데이터를 검색할 수 있다.  
+```
 \_ : 한 개의 문자 매칭  
 % : 정해지지 않은 여러 문자 매칭
+```
+사용 형식은 아래와 같다.
 ``` sql
+# adm로 시작하는 5글자의 단어 검색
+mysql> SELECT * FROM 테이블명 WHERE 컬럼명 LIKE 'adm__';
+
 # admi로 시작하는 5글자의 단어 검색
 mysql> SELECT * FROM 테이블명 WHERE 컬럼명 LIKE 'admi_';
 
