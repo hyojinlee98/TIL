@@ -6,4 +6,4 @@ LOB를 풀기 전에 서버 구축을 해야 한다.
 
 vmware 이미지 형태인 파일을 설치하여 서버를 가동하면 된다.
 
-![시작][./picture/gremlin_0]
+![시작][./picture/gremlin_0.JPG]
