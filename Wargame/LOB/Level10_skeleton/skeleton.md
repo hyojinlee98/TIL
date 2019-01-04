@@ -22,7 +22,7 @@ Password : music world
 
 ![](./picture/skeleton_3.JPG)
 
-쉘코드+NOP(100byte)로 심볼릭 링크를 복사한 파일에 걸어주었다. 리턴주소를 이상하게 주어 core dump를 떠 분석해보았다. 
+쉘코드+NOP(100byte)로 심볼릭 링크를 복사한 파일에 걸어주었다. 처음에 NOP을 주지 않고 쉘코드로만 링크를 걸었더니 문제가 풀리지 않았다. 리턴주소를 이상하게 주어 core dump를 떠 분석해보았다. 
 
 ![](./picture/skeleton_4.JPG)
 
