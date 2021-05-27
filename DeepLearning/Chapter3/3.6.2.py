@@ -1,8 +1,8 @@
 import sys, os
 sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
 import numpy as np
+import pickle
 from dataset.mnist import load_mnist
-from PIL import Image
 
 
 def sigmoid(x) :
@@ -40,7 +40,6 @@ def predict(network, x) :
     y = softmax(a3)
 
     return y
-
 
 x, t = get_data()
 network = init_network()
