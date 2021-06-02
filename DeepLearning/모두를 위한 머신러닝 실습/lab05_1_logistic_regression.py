@@ -1,11 +1,14 @@
 import tensorflow as tf
 
+# [x1, x2]
 x_data = [[1, 2],
           [2, 3],
           [3, 1],
           [4, 3],
           [5, 3],
           [6, 2]]
+
+# binary
 y_data = [[0],
           [0],
           [0],
