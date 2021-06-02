@@ -1,8 +1,8 @@
 import sys, os
 sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
 import numpy as np
+import pickle
 from dataset.mnist import load_mnist
-from PIL import Image
 
 
 def sigmoid(x) :
@@ -41,15 +41,25 @@ def predict(network, x) :
 
     return y
 
-
 x, t = get_data()
 network = init_network()
 
+batch_size = 100    # 배치 크기
 accuracy_cnt = 0
+
+for i in range(0, len(x), batch_size) :
+    x_batch = x[i:i+batch_size]
+    y_batch = predict(network, x_batch)
+    p = np.argmax(y_batch, axis=1)    # 확률이 가장 높은 원소의 인덱스를 얻는다.
+    accuracy_cnt += np.sum(p == t[i:i+batch_size])
+
+
+'''
 for i in range(len(x)) :
     y = predict(network, x[i])
     p = np.argmax(y)    # 확률이 가장 높은 원소의 인덱스를 얻는다.
     if p == t[i] :
         accuracy_cnt += 1
+'''
 
 print("Accuracy:" + str(float(accuracy_cnt) / len(x)))
