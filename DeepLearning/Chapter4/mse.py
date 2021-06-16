@@ -1,3 +1,4 @@
+# 4.2.1_
 import numpy as np
 
 def mean_squared_error(y, t) :

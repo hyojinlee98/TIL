@@ -1,3 +1,4 @@
+# 4.2.2
 import numpy as np
 
 def cross_entropy_error(y, t) :
