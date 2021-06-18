@@ -344,7 +344,280 @@ array([-2.99999994,  3.99999992])
 
 간단한 신경망을 예로 들어 실제로 기울기를 구하는 코드를 구현해보자.  
 ```python
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from common.functions import softmax, cross_entropy_error
+from common.gradient import numerical_gradient
 
+class simpleNet:
+    def __init__(self):
+        self.W = np.random.randn(2,3) # 정규분포로 초기화
+
+    def predict(self, x):
+        return np.dot(x, self.W)
+
+    def loss(self, x, t):
+        z = self.predict(x)
+        y = softmax(z)
+        loss = cross_entropy_error(y, t)
+
+        return loss
 ```
+simpleNet 클래스는 형상이 2x3인 가중치 매개변수 하나를 인스턴스 변수로 갖는다. 메서드는 2개인데, 하나는 예측을 수행하는 predict(x)이고, 다른 하나는 손실 함수의 값을 구하는 loss(x, t)이다. 여기에서 인수 x는 입력 데이터, t는 정답 레이블이다. simpleNet을 사용해 몇 가지 시험을 해보자.  
+```python
+>>> net = simpleNet()  # 객체 생성
+>>> print(net.W)
+[[-0.34117045  0.07532017  0.9477513 ]
+ [ 1.40589289 -0.0236061   0.26806124]]
+>>>
+>>> x = np.array([0.6, 0.9])    
+>>> p = net.predict(x)
+>>> print(p)
+[1.06060133 0.02394661 0.80990589]
+>>> np.argmax(p)  # 최댓값의 인덱스
+0
+>>>
+>>> t = np.array([1, 0, 0])  # 정답 레이블
+>>> net.loss(x, t)
+0.7574816052129008
+>>>
+>>> t = np.array([0, 0, 1])
+>>> net.loss(x, t)
+1.0081769862949894  
+>>>
+>>> t = np.array([0, 1, 0])
+>>> net.loss(x, t)
+1.7941359388394174  # 정답 레이블이 아니라 loss 값이 더 높음
+```
+정답 레이블일 경우 loss 값이 더 작게 나온다. 이어서 기울기를 구해보자. 앞에서처럼 numerical_gradient(f, x)를 써서 구하면 된다.  
+```python
+>>> def f(W) :
+...     return net.loss(x, t)
+... 
+>>> dW = numerical_gradient(f, net.W)
+>>> print(dW)
+[[ 0.28130718 -0.50023712  0.21892995]
+ [ 0.42196077 -0.75035569  0.32839492]]
+```
+numerical_gradient(f, x)의 인수 f는 함수, x는 함수 f의 인수이다. 그래서 여기에서는 net.W를 인수로 받아 손실 함수를 계산하는 새로운 함수 f를 정의했다. 그리고 이 새로 정의한 함수를 numerical_gradient(f, x)에 넘긴다.  
+
+dW는 numerical_gradient(f, net.W)의 결과로, 그 형상은 2x3의 2차원 배열이다. dW의 내용을 보면, 예를 들어 W의 w11은 대략 0.3이다. 이는 w11을 h만큼 늘리면 손실 함수의 값은 0.3h만큼 증가한다는 의미다. 마찬가지로 w12는 대략 -0.5이니, w12를 h만큼 늘리면 손실 함수의 값은 0.5h만큼 감소하는 것이다. 그래서 손실 함수를 줄인다는 관점에서는 w12는 양의 방향으로 갱신하고 w11은 음의 방향으로 갱신해야 함을 알 수 있다. 또, 한 번에 갱신되는 양에는 w12가 w11보다 크게 기여한다는 사실도 알 수 있다.  
+
+참고로 이 구현에서는 새로운 함수를 정의하는 데 `def f(x):...` 문법을 썼는데, 파이썬에서는 간단한 함수라면 람다(lambda) 기법을 쓰면 더 편하다. 가령 lambda를 쓰면 다음곽 ㅏㅌ이 구현할 수 있다.  
+```python
+>>> f = lambda w: net.loss(x, t)
+>>> dW = numerical_gradient(f, net.W)
+```
+신경망의 기울기를 구한 다음에는 경사법에 따라 가중치 매개변수를 갱신하기만 하면 된다. 다음 절에서는 2층 신경망을 대상으로 학습 과정 전체를 구현한다.  
+
+## 4.5 학습 알고리즘 구현하기
+신경망에는 적응 가능한 가중치와 편향이 있고, 이 가중치와 편향을 훈련 데이터에 적응하도록 조정하는 과정을 '학습'이라 한다. 신경망 학습은 다음과 같이 4단계로 수행한다.  
+- 1단계 - 미니배치  
+    훈련 데이터 중 일부를 무작위로 가져온다. 이렇게 선별한 데이터를 미니배치라 하며, 그 미니배치의 손실 함수 값을 줄이는 것이 목표다.  
+- 2단계 - 기울기 산출  
+    미니배치의 손실 함수 값을 줄이기 위해 각 가중치 매개변수의 기울기를 구한다. 기울기는 손실 함수의 값을 가장 작게 하는 방향을 제시한다.  
+- 3단계 - 매개변수 갱신  
+    가중치 매개변수를 기울기 방향으로 아주 조금 갱신한다.  
+- 4단계 - 반복  
+    1 ~ 3단계를 반복한다.  
+
+이것이 신경망 학습이 이뤄지는 순서이다. 이는 경사 하강법으로 매개변수를 갱신하는 방법이며, 이때 데이터를 미니배치로 무작위로 선정하기 때문에 **확률적 경사 하강법** *(stochastic gradient descent, SGD)* 라고 부른다. '확률적으로 무작위로 골라낸 데이터'에 대해 수행하는 경사 하강법이라는 의미이다. 대부분의 딥러닝 프레임워크는 확률적 경사 하강법의 영어 머리글자를 딴 **SGD** 라는 함수로 이 기능을 구현하고 있다.  
+
+### 4.5.1 2층 신경망 클래스 구현하기
+2층 신경망(은닉층이 1개인 네트워크)을 대상으로 MNIST 데이터셋을 사용해 손글씨 숫자를 학습하는 신경망을 구현해보자. 처음에는 2층 신경망을 하나의 클래스로 구현하는 것부터 시작한다. 이 클래스의 이름은 TwoLayerNet이다.  
+```python
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from common.functions import *
+from common.gradient import numerical_gradient
+
+class TwoLayerNet:
+    def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
+        # 가중치 초기화
+        self.params = {}
+        self.params['W1'] = weight_init_std * np.random.randn(input_size, hidden_size)
+        self.params['b1'] = np.zeros(hidden_size)
+        self.params['W2'] = weight_init_std * np.random.randn(hidden_size, output_size)
+        self.params['b2'] = np.zeros(output_size)
+
+    def predict(self, x):
+        W1, W2 = self.params['W1'], self.params['W2']
+        b1, b2 = self.params['b1'], self.params['b2']
+    
+        a1 = np.dot(x, W1) + b1
+        z1 = sigmoid(a1)
+        a2 = np.dot(z1, W2) + b2
+        y = softmax(a2)
+        
+        return y
+        
+    # x : 입력 데이터, t : 정답 레이블
+    def loss(self, x, t):
+        y = self.predict(x)
+        
+        return cross_entropy_error(y, t)
+    
+    def accuracy(self, x, t):
+        y = self.predict(x)
+        y = np.argmax(y, axis=1)
+        t = np.argmax(t, axis=1)
+        
+        accuracy = np.sum(y == t) / float(x.shape[0])
+        return accuracy
+        
+    # x : 입력 데이터, t : 정답 레이블
+    def numerical_gradient(self, x, t):
+        loss_W = lambda W: self.loss(x, t)
+        
+        grads = {}
+        grads['W1'] = numerical_gradient(loss_W, self.params['W1'])
+        grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
+        grads['W2'] = numerical_gradient(loss_W, self.params['W2'])
+        grads['b2'] = numerical_gradient(loss_W, self.params['b2'])
+        
+        return grads
+```  
+<br>
+다음은 이 클래스가 사용하는 중요 변수의 설명이다.   
+
+|변수|설명|
+| ---- | ----------------------------------- |
+|params|신경망의 매개변수를 보관하는 딕셔너리 변수(인스턴스 변수)<br>params['W1']은 1번째 층의 가중치, params['b1']은 1번째 층의 편향
+|grads|params['W2']는 2번째 층의 가중치, params['b2']는 2번째 층의 편향<br>기울기 보관하는 딕셔너리 변수(numerical_gradient() 메소드의 반환 값)<br>grads['W1']은 1번째 층의 가중치의 기울기, grads['b1']은 1번째 층의 편향의 기울기<br>grads['W2']은 2번째 층의 가중치의 기울기, grads['b2']은 2번째 층의 편향의 기울기|    
+<br><br>
+
+|메소드|설명|
+| ---- | ------------------------------------ |
+|__init__(self, input_size, <br>hidden_size, output_size)|초기화를 수행한다.<br>인수는 순서대로 입력층의 뉴런 수, 은닉층의 뉴런 수, 출력층의 뉴런 수|
+|predict(self, x)|예측(추론)을 수행한다.<br>인수 x는 이미지 데이터|
+|loss(self, x, t)|손실 함수의 값을 구한다.<br>인수 x는 이미지 데이터, t는 정답 레이블(아래 칸의 세 메소드의 인수들도 마찬가지)|
+|accuracy(self, x, t)|정확도를 구한다.|
+|numerical_gradient(self, x, t)|가중치 매개변수의 기울기를 구한다.|
+|gradient(self, x, t)|가중치 매개변수의 기울기를 구한다.<br>numerical_gradient()의 성능 개선판|  
+
+TwoLayerNet 클래스는 딕셔너리인 params와 grads를 인스턴스 변수로 갖는다. params 변수에는 가중치 매개변수가 저장되는데, 예를 들어 1번째 층의 가중치 매개변수는 params['W1'] 키에 넘파이 배열로 저장된다. 마찬가지로 1번째 층의 편향은 params['b1'] 키로 접근한다. grads 변수에는 params 변수에 대응하는 각 매개변수의 기울기가 저장된다.  
+
+__init__(self, input_size, hidden_size, output_size) 메소드는 클래스를 초기화한다. 인수는 순서대로 입력층의 뉴런 수, 은닉층의 뉴런 수, 출력층의 뉴런 수이다. 예를 들어 손글씨 숫자 인식에서는 크기가 28x28인 입력 이미지가 총 784개이고, 출력은 10개가 된다. 따라서 input_size=784, output_size=10으로 지정하고 은닉층의 개수인 hidden_size는 적당한 값을 설정한다.  
+
+이 초기화 메소드에서는 가중치 매개변수도 초기화한다. 가중치 매개변수의 초기값을 무엇으로 설정하냐가 신경망 학습의 성공을 좌우하기도 한다. 가중치 매개변수 초기화에 대한 자세한 내용은 나중에 살펴볼 것이고, 여기에서는 정규분포를 따르는 난수로, 편향은 0으로 초기화한다.  
+
+numerical_gradient(self, x, t) 메소드는 각 매개변수의 기울길르 계산한다. 수치 미분 방식으로 각 매개변수의 손실 함수에 대한 기울기를 계산한다. gradient(self, x, t)는 오차역전파법을 사용하여 기울기를 효율적이고 빠르게 계산한다. 오차역전파법은 기울기 계산을 고속으로 수행하는 기법이다. 오차역전파법을 쓰면 수치 미분을 사용할 때와 거의 같은 결과를 훨씬 빠르게 얻을 수 있다. 오차역 전파법으로 기울기를 구하는 gradient(self, x, t) 메소드는 다음 장에서 구한다. 신경망 학습은 시간이 오래 걸리니, 시간을 절약하려면 numerical_gradient(self, x, t) 대신 gradient(self, x, t)를 쓰는 것이 좋다.  
 
 
+### 4.5.2 미니배치 학습 구현하기
+미니배치 학습이란 훈련 데이터 중 일부를 무작위로 꺼내고(미니배치), 그 미니배치에 대해서 경사법으로 매개변수를 갱신한다.  
+```python
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from dataset.mnist import load_mnist
+from two_layer_net import TwoLayerNet
+
+# 데이터 읽기
+(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
+
+network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
+
+# 하이퍼파라미터
+iters_num = 10000  # 반복 횟수를 적절히 설정한다.
+train_size = x_train.shape[0]
+batch_size = 100   # 미니배치 크기
+learning_rate = 0.1
+
+train_loss_list = []
+
+for i in range(iters_num):
+    # 미니배치 획득
+    batch_mask = np.random.choice(train_size, batch_size)
+    x_batch = x_train[batch_mask]
+    t_batch = t_train[batch_mask]
+    
+    # 기울기 계산
+    grad = network.numerical_gradient(x_batch, t_batch)
+    #grad = network.gradient(x_batch, t_batch)  # 성능 개선판
+    
+    # 매개변수 갱신
+    for key in ('W1', 'b1', 'W2', 'b2'):
+        network.params[key] -= learning_rate * grad[key]
+    
+    # 학습 경과 기록
+    loss = network.loss(x_batch, t_batch)
+    train_loss_list.append(loss)
+```
+미니배치 크기를 100으로 했다. 즉, 매번 60,000개의 훈련 데이터에서 임의로 100개의 데이터(이미지 데이터와 정답 레이블 데이터)를 추려낸다. 그리고 그 100개의 미니배치를 대상으로 확률적 경사 하강법(SGD)을 수항해 매개변수를 갱신한다. 경사법에 의한 갱신 횟수(반복 횟수)를 10,000번으로 설정하고, 갱신할 때마다 훈련 데이터에 대한 손실 함수를 계산하고, 그 값을 배열에 추가한다.  
+
+![4-12](../Images/4_12.png)  
+[그림 4-12] 손실 함수 값의 추이 : 왼쪽은 10,000회, 오른쪽은 1,000회 반복까지의 추이    
+
+[그림 4-12] 보면 학습 횟수가 늘어가면서 손실 함수의 값이 줄어든다. 이는 학습이 잘 되고 있다는 뜻으로, 신경망의 가중치 매개변수가 서서히 데이터에 적응하고 있음을 의미한다. 즉, 신경망이 데이터를 반복해서 학습함으로써 최적 가중치 매개변수를 찾아가고 있다.  
+
+### 4.5.3 시험 데이터로 평가하기
+학습을 반복함으로써 손실 함수의 값이 서서히 내려가는 것을 확인해볼 수 있다. 이때의 손실 함수의 값이란, 정확히는 '훈련 데이터의 미니배치에 대한 손실 함수'의 값이다. 훈련 데이터의 손실 함수 값이 작아지는 것은 신경망이 잘 학습하고 있다는 방증이지만, 이 결과만으로는 다른 데이터셋에도 비슷한 실력을 발휘할지는 확실하지 않다.  
+
+신경망 학습에서는 훈련 데이터 외의 데이터를 올바르게 인식하는지를 확인해야 한다. 다른 말로 '오버피팅'을 일으키지 않는지 확인해야 한다. 오버피팅되었다는 것은, 예를 들어 훈련 데이터에 포함된 이미지만 제대로 구분하고, 그렇지 않은 이미지는 식별할 수 없다는 뜻이다.  
+
+신경망 학습의 원래 목표는 범용적인 능력을 익히는 것이다. 이를 위해 훈련 데이터에 포함되지 않은 데이터를 사용해 평가해봐야 한다. 여기에서는 1에폭별로 훈련 데이터와 시험 데이터에 대한 정확도를 기록한다.  
+```
+에폭(epoch)은 하나의 단위이다. 1에폭은 학습에서 훈련 데이터를 모두 소진했을 때의 횟수에 해당한다. 훈련 데이터 10,000개를 100개의 미니배치로 학습할 경우, 확률적 경사 하강법을 100회 반복하면 모든 훈련 데이터를 '소진'한 게 된다. 이 경우 100회가 1에폭이 된다.
+```
+ 
+평가가 제대로 이뤄질 수 있도록 이전 구현으로부터 수정해보자.
+```python
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from dataset.mnist import load_mnist
+from two_layer_net import TwoLayerNet
+
+# 데이터 읽기
+(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
+
+network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
+
+# 하이퍼파라미터
+iters_num = 10000  # 반복 횟수를 적절히 설정한다.
+train_size = x_train.shape[0]
+batch_size = 100   # 미니배치 크기
+learning_rate = 0.1
+
+train_loss_list = []
+train_acc_list = []
+test_acc_list = []
+
+# 1에폭당 반복 수
+iter_per_epoch = max(train_size / batch_size, 1)
+
+for i in range(iters_num):
+    # 미니배치 획득
+    batch_mask = np.random.choice(train_size, batch_size)
+    x_batch = x_train[batch_mask]
+    t_batch = t_train[batch_mask]
+    
+    # 기울기 계산
+    grad = network.numerical_gradient(x_batch, t_batch)
+    #grad = network.gradient(x_batch, t_batch)  # 성능 개선판
+    
+    # 매개변수 갱신
+    for key in ('W1', 'b1', 'W2', 'b2'):
+        network.params[key] -= learning_rate * grad[key]
+    
+    # 학습 경과 기록
+    loss = network.loss(x_batch, t_batch)
+    train_loss_list.append(loss)
+    
+    # 1에폭당 정확도 계산
+    if i % iter_per_epoch == 0:
+        train_acc = network.accuracy(x_train, t_train)
+        test_acc = network.accuracy(x_test, t_test)
+        train_acc_list.append(train_acc)
+        test_acc_list.append(test_acc)
+        print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
+```
+1에폭마다 모든 훈련 데이터와 시험 데이터에 대한 정확도를 계산하고, 그 결과를 기록한다.  
+
+![4-13](../Images/4_13.png)  
+[그림 4-13] 훈련 데이터와 시험 데이터에 대한 정확도 추이  
+
+[그림 4-13]에서는 훈련 데이터에 대한 정확도를 실선으로, 시험 데이터에 대한 정확도를 점선으로 그렸다. 에폭이 진행될수록(학습이 진행될수록) 훈련 데이터와 시험 데이터를 사용하고 평가한 정확도가 모두 좋아지고 있다. 또, 두 정확도에는 차이가 없음을 알 수 있다(두 선이 거의 겹쳐 있음). 다시 말해 이번 학습에서는 오버피팅이 일어나지 않았다.  

@@ -35,10 +35,11 @@ def numerical_gradient(f, x):
     h = 1e-4 # 0.0001
     grad = np.zeros_like(x)
     
+    # 가중치 매개변수 W가 다차원 배열을 처리할 수 있도록 수정
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
     while not it.finished:
         idx = it.multi_index
-        tmp_val = x[idx]
+        tmp_val = x[idx]    # 원본값
         x[idx] = float(tmp_val) + h
         fxh1 = f(x) # f(x+h)
         

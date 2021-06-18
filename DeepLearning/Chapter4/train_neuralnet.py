@@ -31,8 +31,8 @@ for i in range(iters_num):
     t_batch = t_train[batch_mask]
     
     # 기울기 계산
-    #grad = network.numerical_gradient(x_batch, t_batch)
-    grad = network.gradient(x_batch, t_batch)
+    grad = network.numerical_gradient(x_batch, t_batch)
+    #grad = network.gradient(x_batch, t_batch)  # 성능 개선판
     
     # 매개변수 갱신
     for key in ('W1', 'b1', 'W2', 'b2'):

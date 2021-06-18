@@ -17,15 +17,20 @@ class simpleNet:
         z = self.predict(x)
         y = softmax(z)
         loss = cross_entropy_error(y, t)
-
+        
         return loss
-
+'''
 x = np.array([0.6, 0.9])
-t = np.array([0, 0, 1])
+
+# softmax(z) 실행 후 행렬에서 가장 큰 값의 인덱스만 원-핫 인코딩으로 1로 설정
+t = np.array([0, 0, 1])  # 정답 레이블, 실행할 때마다 바뀜
 
 net = simpleNet()
+
+print("W의 값 >> \n", net.W)
 
 f = lambda w: net.loss(x, t)
 dW = numerical_gradient(f, net.W)
 
-print(dW)
+#print(dW)
+'''
