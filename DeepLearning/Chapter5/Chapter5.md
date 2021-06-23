@@ -443,23 +443,364 @@ class Sigmoid:
 신경망의 순전파 때 수행하는 동안 행렬의 내적은 기하학에서는 어파인 변환(Affine transformation)이라고 한다. 그래서 이 책에서는 어파인 변환을 수행하는 처리를 'Affine 계층'이라는 이름으로 구현한다.   
 ```
 
-행렬의 내적과 편향의 합을 계산 그래프로 그려보자. 내적을 계산하는 노드를 'dot'이라 하면 np.dot(X, W) + B 계산은 [그림 5-24]처럼 그려진다. 또한, 각 변수의 이름 위에 그 변수의 이이름도 ㄸ]
+행렬의 내적과 편향의 합을 계산 그래프로 그려보자. 내적을 계산하는 노드를 'dot'이라 하면 np.dot(X, W) + B 계산은 [그림 5-24]처럼 그려진다. 또한, 각 변수의 이름 위에 그 변수의 형상도 표기한다.  
+
+![5-24](../Images/5_24.png)  
+[그림 5-24] Affine 계층의 계산 그래프 : 변수가 행렬임에 주의. 각 변수의 형상을 변수명 위에 표기  
+
+[그림 5-24]는 비교적 단순한 계산 그래프다. 단, X, W, B가 행렬(다차원 배열)이라는 점에 주의해야 한다. 지금까지의 계산 그래프는 노드 사이에 `스칼라값`이 흘렀는 데 반해, 이 예에서는 `행렬`이 흐르고 있다.  
+
+행렬을 사용한 역전파도 행렬의 원소마다 전개해보면 스칼라값을 사용한 지금까지의 계산 그래프와 같은 순서로 생각할 수 있다. 실제로 전개해보면 다음 식이 도출된다.  
+
+![5.13](../Images/e_5.13.png)  
+[식 5.13]  
+
+![5.14](../Images/e_5.14.png)  
+[식 5.14]  
+
+[식 5.14]와 같이 W의 형상이 (2, 3)이었다면 W의 전치행렬의 형상은 (3, 2)가 된다. [식 5.13]을 바탕으로 계산 그래프의 역전파를 구해보자. 결과는 [그림 5-25]처럼 된다.  
+
+![5-25](../Images/5_25.png)  
+[그림 5-25] Affine 계층의 역전파 : 변수가 다차원 배열. 역전파에서의 변수 형상은 해당 변수명 아래에 표기  
+
+각 변수의 형상에 주의해서 살펴봐야 한다. 특히 X와 ∂L/∂X은 같은 형상이고, W와 ∂L/∂W도 같은 형상이다. X와 ∂L/∂X의 형상이 같다는 것은 다음 식을 보면 명확해진다.  
+
+![5.15](../Images/e_5.15.png)  
+[식 5.15]  
+
+행렬의 내적에서는 대응하는 차원의 원소 수를 일치시켜야 한다. 예를 들어 ∂L/∂Y의 형상이 (3,)이고 W의 형상이 (2, 3)일 떄 ∂L/∂X의 형상이 (2,)가 되는 ∂L/∂Y과 W의 내적을 생각해보자. 그러면 자연히 [식 5.13]이 유도된다.  
+
+![5-26](../Images/5_26.png)  
+[그림 5-26] 행렬 내적(`dot` 노드)의 역전파는 행렬의 대응하는 차원의 원소 수가 일치하도록 내적을 조립하여 구할 수 있다.  
+
+### 5.6.2 배치용 Affine 계층
+지금까지 설명한 Affine 계층은 입력 데이터로 X 하나만을 고려한 것이었다. 이번 절에서는 데이터 N개를 묶어 순전파하는 경우, 즉 배치용 Affine 계층을 생각해보자(묶은 데이터를 `배치`라고 부른다). 계산 그래프로 그려보면 다음과 같다.  
+
+![5-27](../Images/5_27.png)  
+[그림 5-27] 배치용 Affine 계층의 계산 그래프  
+
+기존과 다른 부분은 입력인 X의 형상이 (N, 2)가 된 것 뿐이다. 그 뒤로는 지금까지와 같이 계산 그래프의 순서를 따라 순순히 행렬 계산을 하게 된다. 또, 역전파 때는 행렬의 형상에 주의하면 ∂L/∂X과 ∂L/∂W은 이전과 같이 도출할 수 있다.  
+
+편향을 더할 때도 주의해야 한다. 순전파 때의 편향 덧셈은 X · W에 대한 편향이 각 데이터에 더해진다. 예를 들어 N = 2(데이터가 2개)로 한 경우, 편향은 그 두 데이터 각각의 계산 결과에 더해진다. 구체적인 예를 살펴보자.  
+
+```python 
+>>> X_dot_W = np.array([[0,0,0], [10,10,10]])
+>>> B = np.array([1, 2, 3])
+>>> 
+>>> X_dot_W
+array([[ 0,  0,  0],
+       [10, 10, 10]])
+>>> X_dot_W + B
+array([[ 1,  2,  3],
+       [11, 12, 13]])
+```
+
+순전파의 편향 덧셈은 각각의 데이터에 더해진다. 그래서 역전파 때는 각 데이터의 역전파 값이 편향의 원소에 모여야 한다. 코드로는 다음과 같다.  
+
+```python
+>>> dY = np.array([[1, 2, 3], [4, 5, 6]])
+>>> dY
+array([[1, 2, 3],
+       [4, 5, 6]])
+>>>
+>>> dB = np.sum(dY, axis=0)
+>>> dB
+array([5, 7, 9])
+```
+이 예에서는 데이터가 2개(N = 2)라고 가정하자. 편향의 역전파는 그 두 데이터에 대한 미분을 데이터마다 더해서 구한다. 그래서 np.sum()에서 0번째 축(데이터를 단위로 한 축)에 대해서 (axis=0)의 총합을 구하는 것이다.  
+
+Affine 구현은 다음과 같다.  
+
+```python
+class Affine:
+    def __init__(self, W, b):
+        self.W = W
+        self.b = b
+        self.x = None
+        self.dW = None
+        self.db = None
+
+    def forward(self, x):
+        self.x = x
+        out = np.dot(self.x, self.W) + self.b
+
+        return out
+
+    def backward(self, dout):
+        dx = np.dot(dout, self.W.T)     # self.W.T는 W의 전치행렬
+        self.dW = np.dot(self.x.T, dout)
+        self.db = np.sum(dout, axis=0)
+        
+        return dx
+```
 
 
+### 5.6.3 Softmax-with-Loss 계층
+출력층에서 사용하는 소프트맥스 함수는 입력 값을 정규화하여 출력한다. 예를 들어 손글씨 숫자 인식에서의 Softmax 계층의 출력은 [그림 5-28]처럼 된다.  
+
+![5-28](../Images/5_28.png)  
+[그림 5-28] 입력 이미지가 Affine 계층과 ReLU 계층을 통과하여 변환되고, 마지막 Softmax 계층에 의해서 10개의 입력이 정규화된다. 이 그림에서는 숫자 '0'의 점수는 5.3이며, 이것이 Softmax 계층에 의해서 0.008(0.8%)로 변환된다. 또 '2'의 점수는 10.1에서 0.991(99.1%)로 변환된다.   
+
+[그림 5-28]과 같이 Softmax 계층은 입력 값을 정규화(출력의 합이 1이 되도록 변형)하여 출력한다. 또한, 손글씨 숫자는 가짓수가 10개(10클래스 분류)이므로 Softmax 계층의 입력은 10개가 된다.  
+
+```
+신경망에서 수행하는 작업은 학습과 추론 두 가지이다. 추론할 때는 일반적으로 Softmax 계층을 사용하지 않는다. [그림 5-28]의 신경망은 추론할 때 마지막 Affine 계층의 출력을 인식 결과로 이용한다. 또한, 신경망에서 정규화하지 않는 출력 결과([그림 5-28]에서는 Softmax 앞의 Affine 계층의 출력)를 점수라 한다. 즉, 신경망 추론에서 답을 하나만 내는 경우에는 가장 높은 점수만 알면 되니 Softmax 계층은 필요 없다는 것이다. 반면, 신경망을 학습할 때는 Softmax 계층이 필요하다. 
+```
+
+이제 소프트맥스 계층을 구현할 텐데, 손실 함수인 교차 엔트로피 오차도 포함하여 'Softmax-with-Loss 계층'이라는 이름으로 구현한다. 먼저 Softmax-with-Loss 계층의 계산 그래프를 살펴보자.  
+
+![5-29](../Images/5_29.png)  
+[그림 5-29] Softmax-with-Loss 계층의 계산 그래프   
+
+계산 그래프를 [그림 5-30]처럼 간소화할 수 있다. 
+
+![5-30](../Images/5_30.png)  
+[그림 5-30] 간소화한 Softmax-with-Loss 계층의 계산 그래프   
+
+[그림 5-30]의 계산 그래프에서 소프트맥스 함수는 'Softmax' 계층으로, 교차 엔트로피 오차는 'Cross Entropy Error' 계층으로 표기했다. 여기에서는 3클래스 분류를 가정하고 이전 계층에서 3개의 입력(점수)을 받는다. 그림과 같이 Softmax 계층은 입력(a1, a2, a3)를 정규화하여 (y1, y2, y3)를 출력한다. Cross Entropy Error 계층은 Softmax의 출력(y1, y2, y3)와 정답 레이블(t1, t2, t3)를 받고, 이들 데이터로부터 손실 L을 출력한다.  
+
+[그림 5-30]에서 Softmax 계층의 역전파는 (y1-t1, y2-t2, y3-t3)이다. (y1, y2, y3)는 Softmax 계층의 출력이고 (t1, t2, t3)는 정답 레이블이므로 (y1-t1, y2-t2, y3-t3)는 Softmax 계층의 출력과 정답 레이블의 차분인 것이다. 신경망의 역전파에서는 이 차이인 오차가 앞 계층에 전해지는 것이다. 이는 신경망 학습의 중요한 성질이다.  
+
+그런데 신경망 학습의 목적은 신경망의 출력(Softmax의 출력)이 정답 레이블과 가까워지도록 가중치 매개변수의 값을 조정하는 것이었다. 그래서 신경망의 출력과 정답 레이블의 오차를 효율적으로 앞 계층에 전달해야 한다. 앞의 (y1-t1, y2-t2, y3-t3)라는 결과는 바로 Softmax 계층의 출력과 정답 레이블의 차이로, 신경망의 현재 출력과 정답 레이블의 오차를 있는 그대로 드러내는 것이다.  
+
+```
+'소프트맥스 함수'의 손실 함수로 '교차 엔트로피 오차'를 사용하니 역전파가 (y1-t1, y2-t2, y3-t3)로 말끔히 떨어진다. 사실 이런 말끔함은 우연이 아니라 교차 엔트로피 오차라는 함수가 그렇게 설계되었기 때문이다. 또, 회귀의 출력층에서 사용하는 '항등 함수'의 손실 하뭇로 '평균 제곱 오차'를 이용하는 이유도 이와 같다. 즉, '항등 함수'의 손실 함수로 '평균 제곱 오차'를 사용하면 역전파의 결과가 (y1-t1, y2-t2, y3-t3)로 말끔히 떨어진다.  
+```
+
+구체적인 예를 하나 확인해보자. 가령 정답 레이블이 (0, 1, 0)일 때 Softmax 계층이 (0.3, 0.2, 0.5)를 출력했다고 해보자. 정답 레이블을 보면 정답의 인덱스는 1이다. 그런데 출력에서는 이때의 확률이 겨우 0.2(20%)라서, 이 시점의 신경망은 제대로 인식하지 못하고 있다. 이 경우 Softmax 계층의 역전파는 (0.3, -0.8, 0.5)라는 커다란 오차를 전파한다. 결과적으로 Softmax 계층의 앞 계층들은 그 큰 오차로부터 큰 깨달음을 얻게 된다.  
+
+이번에 살펴볼 예는 정답 레이블이 똑같이 (0, 1, 0)일 때 Softmax 계층이 (0.01, 0.99, 0)을 출력한 경우이다. 이 경우 Softmax 계층의 역전파가 보내는 오차는 비교적 작은 (0.01, -0.01, 0)이다. 이번에는 앞 계층으로 전달된 오차가 작으므로 학습하는 정도도 작아진다.  
+
+Softmax-with-Loss 계층을 구현한 코드를 보자.  
+
+```python
+class SoftmaxWithLoss:
+    def __init__(self):
+        self.loss = None # 손실함수
+        self.y = None    # softmax의 출력
+        self.t = None    # 정답 레이블(원-핫 인코딩 형태)
+        
+    def forward(self, x, t):
+        self.t = t
+        self.y = softmax(x)
+        self.loss = cross_entropy_error(self.y, self.t)
+        
+        return self.loss
+
+    def backward(self, dout=1):
+        batch_size = self.t.shape[0]
+        dx = (self.y - self.t) / batch_size
+
+        return dx
+```
+softmax()와 cross_entropy_error() 함수를 이용했다. 역전파 때는 전파하는 값을 배치의 수(batch_size)로 나눠서 데이터 1개당 오차를 앞 계층으로 전파하는 점에 주의해야 한다.  
 
 
+## 5.7 오차역전파법 구현하기
+지금까지 구현한 계층을 조합해서 신경망을 구축해보자.  
+
+### 5.7.1 신경망 학습의 전체 그림
+구체적인 구현에 들어가기 전에 신경망 학습의 전체 그림을 복습해보자. 다음은 신경망 학습의 순서이다.  
+
+**전제**  
+- 신경망에는 적응 가능한 가중치와 편향이 있고, 이 가중치와 편향을 훈련 데이터에 적응하도록 조정하는 과정을 '학습'이라 한다. 신경망 학습은 다음과 같이 4단계로 수행한다.  
+
+**1단계 - 미니배치**
+- 훈련 데이터 중 일부를 무작위로 가져온다. 이렇게 선별한 데이터를 미니배치라 하며, 그 미니배치의 손실 함수 값을 줄이는 것이 목표다.  
+
+**2단계 - 기울기 산출**
+- 미니배치의 손실 함수 값을 줄이기 위해 각 가중치 매개변수의 기울기를 구한다. 기울기는 손실 함수의 값을 가장 작게 하는 방향을 제시한다.  
+
+**3단계 - 매개변수 갱신**
+- 가중치 매개변수를 기울기 방향으로 아주 조금 갱신한다.
+
+**4단계 - 반복**
+- 1~3단계를 반복한다. 
+
+지금까지 설명한 오차역전파법이 등장하는 단계는 두 번째인 '기울기 산출'이다. 앞 장에서는 이 기울기를 구하기 위해서 수치 미분을 사용했다. 그런데 수치 미분은 구현하기는 쉽지만 계산이 오래 걸렸다. 오차역전파법을 이용하면 느린 수치 미분과 달리 기울기를 효율적이고 빠르게 구현할 수 있다.  
 
 
+### 5.7.2 오차역전파법을 적용한 신경망 구현하기
+여기에서는 2층 신경망을 TwoLayerNet 클래스로 구현한다.  
+
+```python
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from common.layers import *
+from common.gradient import numerical_gradient
+from collections import OrderedDict
+
+class TwoLayerNet:
+    
+    def __init__(self, input_size, hidden_size, output_size, weight_init_std = 0.01):
+        # 가중치 초기화
+        self.params = {}    # 딕셔너리 변수, 신경망의 매개변수 보관.
+        self.params['W1'] = weight_init_std * np.random.randn(input_size, hidden_size)  # 가중치
+        self.params['b1'] = np.zeros(hidden_size)   # 편향
+        self.params['W2'] = weight_init_std * np.random.randn(hidden_size, output_size) 
+        self.params['b2'] = np.zeros(output_size)
+
+        # 계층 생성
+        self.layers = OrderedDict() # 딕셔너리 변수, 신경망의 계층 보관.
+        self.layers['Affine1'] = Affine(self.params['W1'], self.params['b1'])
+        self.layers['Relu1'] = Relu()
+        self.layers['Affine2'] = Affine(self.params['W2'], self.params['b2'])
+
+        self.lastLayer = SoftmaxWithLoss()  # 신경망의 마지막 계층
+        
+    def predict(self, x):
+        # 예측(추론) 수행, 인수 x는 이미지 데이터
+        for layer in self.layers.values():
+            x = layer.forward(x)
+        
+        return x
+        
+    # x : 입력 데이터, t : 정답 레이블
+    def loss(self, x, t):
+        # 손실 함수의 값
+        y = self.predict(x)
+        return self.lastLayer.forward(y, t)
+    
+    def accuracy(self, x, t):
+        # 정확도 구함
+        y = self.predict(x)
+        y = np.argmax(y, axis=1)
+        if t.ndim != 1 : t = np.argmax(t, axis=1)
+        
+        accuracy = np.sum(y == t) / float(x.shape[0])
+        return accuracy
+        
+    # x : 입력 데이터, t : 정답 레이블
+    def numerical_gradient(self, x, t):
+        # 가중치 매개변수의 기울기를 수치 미분 방식으로 구함
+        loss_W = lambda W: self.loss(x, t)
+        
+        grads = {}
+        grads['W1'] = numerical_gradient(loss_W, self.params['W1'])
+        grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
+        grads['W2'] = numerical_gradient(loss_W, self.params['W2'])
+        grads['b2'] = numerical_gradient(loss_W, self.params['b2'])
+        
+        return grads
+        
+    def gradient(self, x, t):
+        # 가중치 매개변수의 기울기를 오차역전파법으로 구함
+        # forward
+        self.loss(x, t)
+
+        # backward
+        dout = 1
+        dout = self.lastLayer.backward(dout)
+        
+        layers = list(self.layers.values())
+        layers.reverse()
+        for layer in layers:
+            dout = layer.backward(dout)
+
+        # 결과 저장
+        grads = {}
+        grads['W1'], grads['b1'] = self.layers['Affine1'].dW, self.layers['Affine1'].db
+        grads['W2'], grads['b2'] = self.layers['Affine2'].dW, self.layers['Affine2'].db
+
+        return grads
+```
+클래스의 구현은 길지만, 4.5 학습 알고리즘 구현하기와 공통되는 부분이 많다. 앞 장과 크게 다른 부분은 계층을 사용한다는 점이다. 계층을 사용함으로써 인식 결과를 얻는 처리(predict())와 기울기를 구하는 처리(gradient()) 계층의 전파만으로 동작이 이루어지는 것이다.  
+
+신경망의 계층을 순서가 있는 딕셔너리인 OrderedDict에 보관한다. `순서가 있는`이란 딕셔너리에 추가한 순서를 기억한다는 것이다. 그래서 순전파 때는 추가한 순서대로 각 계층의 forward() 메소드를 호출하기만 하면 처리가 완료된다. 마찬가지로 역전파 때는 계층을 반대 순서로 호출하기만 하면 된다. Affine 계층과 ReLU 계층이 각자의 내부에서 순전파와 역전파를 제대로 처리하고 있으니 여기에서는 그냥 계층을 올바른 순서로 연결한 다음 순서대로(혹은 역순으로) 호출해주면 끝이다.  
+
+이처럼 신경망의 구성 요소를 `계층`으로 구현한 덕분에 신경망을 쉽게 구축할 수 있었다. `계층`으로 모듈화해서 구현한 효과는 아주 크다. 예건대 5층, 10층, 20층, ...과 같이 깊은 신경망을 만들고 싶다면, 단순히 필요한 만큼 계층을 더 추가하면 되기 때문이다.  
+
+### 5.7.3 오차역전파법으로 구한 기울기 검증하기
+각 계층 내부에 구현된 순전파와 역전파를 활용해 인식 처리와 학습에 필요한 기울기를 정확하게 구해보자. 지금까지 기울기를 구하는 방법을 두 가지 설명했다. 하나는 수치 미분을 써서 구하는 방법, 또 하나는 해석적으로 수식을 풀어 구하는 방법이다. 후자인 해석적 방법은 오차역전파법을 이용하여 매개변수가 많아도 효율적으로 계산할 수 있었다. 그러니 이제부터는 느린 수치 미분 대신 오차역전파법을 사용하기로 하자. 수치 미분은 오차역전파법을 정확히 구현했는지 확인하기 위해 필요하다.  
+
+수치 미분의 이점은 구현하기 쉽다. 그래서 수치 미분의 구현에는 버그가 숨어 있기 어려운 반면, 오차역전파법은 구현하기 복잡해서 종종 실수를 하곤 한다. 그래서 수치 미분의 결과와 오차역전파법의 결과를 비교하여 오차역전파법을 제대로 구현했는지 검증하곤 한다. 이처럼 두 방식으로 구한 기울기가 일치함(엄밀히 말하면 거의 같음)을 확인하는 작업을 **기울기 확인**이라고 한다. 기울기 확인은 다음과 같이 구현한다.  
+
+```python 
+import sys, os
+sys.path.append(os.pardir)  # 부모 디렉터리의 파일을 가져올 수 있도록 설정
+import numpy as np
+from dataset.mnist import load_mnist
+from two_layer_net import TwoLayerNet
+
+# 데이터 읽기
+(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
+
+network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
+
+x_batch = x_train[:3]
+t_batch = t_train[:3]
+
+grad_numerical = network.numerical_gradient(x_batch, t_batch)   # 수치 미분 
+grad_backprop = network.gradient(x_batch, t_batch)              # 오차역전파법
+
+# 각 가중치의 절대 오차의 평균을 구한다.
+for key in grad_numerical.keys():
+    diff = np.average( np.abs(grad_backprop[key] - grad_numerical[key]) )
+    print(key + ":" + str(diff))
+```
+
+가장 먼저 MNIST 데이터셋을 읽는다. 그리고 훈련 데이터 일부를 수치 미분으로 구한 기울기와 오차역전파법으로 구한 기울기의 오차를 확인한다. 여기에서는 각 가중치 매개변수의 차이의 절댓값을 구하고, 이를 평균한 값이 오차가 된다. 이 코드의 실행 결과는 다음과 같다.  
+
+```python 
+W1:3.6215552277306026e-10
+b1:2.2017655835166005e-09
+W2:4.49198005447526e-09
+b2:1.405077107732855e-07
+```
+
+이 결과는 수치 미분과 오차역전파법으로 구한 기울기의 차이가 매우 작다고 말해준다. 가령 1번째 층의 편향 오차는 0.00000000000097이다. 이로써 오차역전파법으로 구한 기울기도 올바름이 드러나면서 실수 없이 구현했다는 믿음이 커지는 것이다.  
+
+```
+수치 미분과 오차역전파법의 결과 오차가 0이 되는 일은 드물다. 이는 컴퓨터가 할 수 있는 계산의 정밀도가 유한(가령 32비트 부동소수점)하기 때문이다. 이 정밀도의 한계 때문에 오차는 대부분 0이 되지는 않지만, 올바르게 구현했다면 0에 아주 가까운 작은 값이 된다. 만약 그 값이 크면 오차역전파법을 잘못 구현했다고 의심해봐야 한다. 
+```
 
 
+### 5.7.4 오차역 전파법을 사용한 학습 구현하기
+마지막으로 오차역전파법을 사용한 신경망 학습을 구현해보자. 지금까지와 다른 부분은 기울기를 오차역전파법으로 구한다는 점뿐이다.  
 
+```python
+import sys, os
+sys.path.append(os.pardir)
+import numpy as np
+from dataset.mnist import load_mnist
+from two_layer_net import TwoLayerNet
 
+# 데이터 읽기
+(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
 
+network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
 
+iters_num = 10000
+train_size = x_train.shape[0]
+batch_size = 100
+learning_rate = 0.1
 
+train_loss_list = []
+train_acc_list = []
+test_acc_list = []
 
+iter_per_epoch = max(train_size / batch_size, 1)
 
-
-
-
-
+for i in range(iters_num):
+    batch_mask = np.random.choice(train_size, batch_size)
+    x_batch = x_train[batch_mask]
+    t_batch = t_train[batch_mask]
+    
+    # 기울기 계산
+    grad = network.gradient(x_batch, t_batch) # 오차역전파법 방식(훨씬 빠르다)
+    
+    # 갱신
+    for key in ('W1', 'b1', 'W2', 'b2'):
+        network.params[key] -= learning_rate * grad[key]
+    
+    loss = network.loss(x_batch, t_batch)
+    train_loss_list.append(loss)
+    
+    if i % iter_per_epoch == 0:
+        train_acc = network.accuracy(x_train, t_train)
+        test_acc = network.accuracy(x_test, t_test)
+        train_acc_list.append(train_acc)
+        test_acc_list.append(test_acc)
+        print(train_acc, test_acc)
+```
