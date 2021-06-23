@@ -185,6 +185,181 @@ z = xy라는 식을 생각해보자. 이 식의 미분은 다음과 같다.
 
 
 ## 5.4 단순한 계층 구현하기
+'사과 쇼핑' 예를 파이썬으로 구현해보자. 여기에서는 계산 그래프의 곱셈 노드를 'MulLayer', 덧셈 노드를 'AddLayer'라는 이름으로 구현한다.  
+```
+다음 절에서는 신경망을 구성하는 '계층' 각각을 하나의 클래스로 구현한다. 여기에서 말하는 '계층'이란 신경망의 기능 단위이다. 예를 들어 시그모이드 함수를 위한 Sigmoid, 행렬 내적을 위한 Affine 등의 기능을 계층 단위로 구현한다. 그래서 이번 절에서도 곱셈 노드와 덧셈 노드를 '계층' 단위로 구현한다. 
+```
+
+### 5.4.1 곱셈 계층
+모든 계층은 forward()와 backward()라는 공통의 메소드(인터페이스)를 갖도록 구현할 것이다. forward()는 순전파, backward()은 역전파를 처리한다. 곱셈 계층은 MulLayer라는 이름의 클래스로 다음과 같이 구현할 수 있다.  
+
+```python
+class MulLayer :
+    def __init__(self) :
+        self.x = None
+        self.y = None
+    
+    def forward(self, x, y) :
+        self.x = x
+        self.y = y
+        out = x * y
+
+        return out
+    
+    def backward(self, dout) :
+        dx = dout * self.y  # x와 y를 바꾼다.
+        dy = dout * self.x
+
+        return dx, dy
+```
+__init__()에서는 인스턴스 변수인 x, y를 초기화한다. 이 두 변수는 순전파 시의 입력 값을 유지하기 위해 사용한다. forward()에서는 x와 y를 인수로 받고 두 값을 곱해서 반환한다. 반면 backward()에서는 상류에서 넘어온 미분(dout)에 순전파 때의 값을 '서로 바꿔' 곱한 후 하류로 흘린다.  
+
+이 MulLayer를 사용해서 앞으로 본 '사과 쇼핑'을 구현해보자. 앞 절에서는 계산 그래프의 순전파와 역전파를 써서 [그림 5-16]과 같이 계산할 수 있었다.  
+
+![5-16](../Images/5_16.png)  
+[그림 5-16] 사과 2개 구입  
+
+MulLayer를 사용하여 [그림 5-16]의 순전파를 다음과 같이 구현할 수 있다.  
+
+```python
+apple = 100
+apple_num = 2
+tax = 1.1
+
+# 계층들
+mul_apple_layer = MulLayer()
+mul_tax_layer = MulLayer()
+
+# 순전파
+apple_price = mul_apple_layer.forward(apple, apple_num)
+price = mul_tax_layer.forward(apple_price, tax)
+
+print(price)    # 220.00000000000003
+```
+
+각 변수에 대한 미분은 backward()에서 구할 수 있다.  
+
+```python 
+# 역전파
+dprice = 1
+dapple_price, dtax = mul_tax_layer.backward(dprice)
+dapple, dapple_num = mul_apple_layer.backward(dapple_price)
+
+print(dapple, dapple_num, dtax)   # 2.2 110.00000000000001 200
+```
+backward() 호출 순서는 forward() 때와는 반대다. 또, backward()가 받는 인수는 '순전파의 출력에 대한 미분'임에 주의해야 한다. 가령 mul_apple_layer라는 곱셈 계층은 순전파 때는 apple_price를 출력하지만, 역전파 때는 apple_price의 미분 값인 dprice_price를 인수로 받는다. 마지막으로, 이 코드를 실행한 결과는 [그림 5-16]의 결과와 일치한다.  
+
+
+### 5.4.2 덧셈 계층
+```python 
+class AddLayer :
+    def __init__(self) :
+        pass
+
+    def forward(self, x, y) :
+        out = x + y
+        return out
+
+    def backward(self, dout) :
+        dx = dout * 1
+        dy = dout * 1
+        return dx, dy
+```
+덧셈 계층에서는 초기화가 필요 없으니 __init__()에서는 아무 일도 하지 않는다. 덧셈 계층의 forward()에서는 입력받은 두 인수 x, y를 더해서 반환한다. backward()에서는 상류에서 내려온 미분(dout)을 그대로 하류로 흘릴 뿐이다.  
+
+이 덧셈 계층과 곱셈 계층을 사용하여 사과 2개와 귤 3개를 사는 [그림 5-17]의 상황을 구현해보자.  
+
+![5-17](../Images/5_17.png)  
+[그림 5-17] 사과 2개와 귤 3개 구입  
+
+```python 
+apple = 100
+apple_num = 2
+orange = 150
+orange_num = 3
+tax = 1.1
+
+# layer
+mul_apple_layer = MulLayer()
+mul_orange_layer = MulLayer()
+add_apple_orange_layer = AddLayer()
+mul_tax_layer = MulLayer()
+
+# forward
+apple_price = mul_apple_layer.forward(apple, apple_num)  # (1)
+orange_price = mul_orange_layer.forward(orange, orange_num)  # (2)
+all_price = add_apple_orange_layer.forward(apple_price, orange_price)  # (3)
+price = mul_tax_layer.forward(all_price, tax)  # (4)
+
+# backward
+dprice = 1
+dall_price, dtax = mul_tax_layer.backward(dprice)  # (4)
+dapple_price, dorange_price = add_apple_orange_layer.backward(dall_price)  # (3)
+dorange, dorange_num = mul_orange_layer.backward(dorange_price)  # (2)
+dapple, dapple_num = mul_apple_layer.backward(dapple_price)  # (1)
+
+print(price)  # 715
+print(dapple_num, dapple, dorange, dorange_num, dtax)   # 110 2.2 3.3 165 650
+```
+
+
+## 5.5 활성화 함수 계층 구현하기
+계산 그래프를 신경망에 적용하는데 여기에서는 신경망을 구성하는 층(계층) 각각을 클래스 하나로 구현한다. 우선은 활성화 함수인 ReLU와 Sigmoid 계층을 구현해보자.  
+
+### 5.5.1 ReLU 계층
+활성화 함수로 사용되는 ReLU의 수식은 다음과 같다.  
+
+![5.7](../Images/e_5.7.png)  
+[식 5.7]  
+
+[식 5.7]에서 x에 대한 y의 미분은 [식 5.8]처럼 구한다.  
+
+![5.8](../Images/e_5.8.png)  
+[식 5.8]  
+
+[식 5.8]에서와 같이 순전파 때의 입력인 x가 0보다 크면 역전파는 상류의 값을 그대로 하류로 흘린다. 반면, 순전파 때 x가 0 이하면 역전파 때는 하류로 신호를 보내지 않는다(0 보냄). 계산 그래프로는 [그림 5-18]처럼 그릴 수 있다.  
+
+![5-18](../Images/5_18.png)  
+[그림 5-18] ReLU 계층의 계산 그래프  
+
+신경망 계층의 forward()와 backward() 함수는 넘파이 배열을 인수로 받는다고 가정하고 ReLU 계층을 구현해보자.  
+
+```python
+class Relu:
+    def __init__(self):
+        self.mask = None
+
+    def forward(self, x):
+        self.mask = (x <= 0)
+        out = x.copy()
+        out[self.mask] = 0
+
+        return out
+
+    def backward(self, dout):
+        dout[self.mask] = 0
+        dx = dout
+
+        return dx
+```
+Relu 클래스는 mask라는 인스턴스 변수를 가진다. mask는 True/False로 구성된 넘파이 배열로, 순전파의 입력인 x의 원소 값이 0 이하인 인덱스는 True, 그 외(0보다 큰 원소)는 False로 유지한다.  
+
+[그림 5-18]과 같이 순전파 때의 입력 값이 0 이하면 역전파 떄의 값은 0이 돼야 한다. 그래서 역전파 때는 순전파 때의 입력 값이 0 이하면 역전파 때의 값은 0이 돼야 한다. 그래서 역전파 때는 순전파 때 만들어둔 mask를 써서 mask의 원소가 True인 곳에는 상류에서 전파된 dout을 0으로 설정한다.  
+```
+ReLU 계층은 전기 회로의 '스위치'에 비유할 수 있다. 순전파 때 전류가 흐르고 있으면 스위치를 ON으로 하고, 흐르지 않으면 OFF로 한다. 역전파 때는 스위치가 ON이라면 전류가 그대로 흐르고, OFF면 더 이상 흐르지 않는다. 
+```
+
+### 5.5.2 Sigmoid 계층 
+시그모이드 함수는 다음 식을 의미하는 함수다.  
+
+![5.9](../Images/e_5.9.png)  
+[식 5.9]  
+
+[식 5.9]를 계산 그래프로 그리면 [그림 5-19]처럼 된다.  
+
+![5-19](../Images/5_19.png)  
+[그림 5-19] Sigmoid 계층의 계산 그래프(순전파)  
+
 
 
 

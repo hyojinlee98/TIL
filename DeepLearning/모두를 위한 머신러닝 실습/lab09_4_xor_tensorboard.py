@@ -28,3 +28,7 @@ print('Prediction: \n', predictions)
 score = tf.model.evaluate(x_data, y_data)
 print('Accuracy: ', score[1])
 
+'''
+tensorboard --logdir=./logs/fit
+http://127.0.0.1:6006
+'''
