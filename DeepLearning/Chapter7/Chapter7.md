@@ -292,7 +292,53 @@ forward 구현의 마지막에서는 출력 데이터를 적절한 형상으로 
 합성곱 계층의 역전파는 Affine 계층의 구현과 공통점이 많아 생략한다. 합성곱 계층의 역전파에서는 im2col을 역으로 처리해야 한다. col2im 을 사용한다는 점을 제외하면 합성곱 계층의 역전파는 Affine 계층과 똑같다.  
 
 ### 7.4.4 풀링 계층 구현하기
+풀링 계층 구현도 합성곱 계층과 마찬가지로 im2col을 사용해 입력 데이터를 전개한다. 단, 풀링의 경우엔 채널 쪽이 독립적이라는 점이 합성곱 계층 때와 다르다. 구체적으로는 [그림 7-21]과 같이 풀링 적용 영역을 채널마다 독립적으로 전개한다. 
 
+![7-21](../Images/7_21.png)  
+[그림 7-21] 입력 데이터에 풀링 적용 영역을 전개 (2x2 풀링의 예)    
+
+일단 이렇게 전개한 후, 전개한 행렬에서 행별 최댓값을 구하고 적절한 형상으로 성형하기만 하면 된다(그림 7-22).
+
+![7-22](../Images/7_22.png)  
+[그림 7-22] 풀링 계층 구현의 흐름 : 풀링 적용 영역에서 가장 큰 원소는 회색으로 표시    
+
+풀링 계층의 forward 처리 흐름이다. 다음은 이를 파이썬으로 구현한 코드이다.  
+
+```python
+class Pooling:
+    def __init__(self, pool_h, pool_w, stride=1, pad=0):
+        self.pool_h = pool_h
+        self.pool_w = pool_w
+        self.stride = stride
+        self.pad = pad
+
+    def forward(self, x):
+        N, C, H, W = x.shape
+        out_h = int(1 + (H - self.pool_h) / self.stride)
+        out_w = int(1 + (W - self.pool_w) / self.stride)
+
+        # 전개 (1)
+        col = im2col(x, self.pool_h, self.pool_w, self.stride, self.pad)
+        col = col.reshape(-1, self.pool_h*self.pool_w)
+
+        # 최댓값 (2)
+        out = np.max(col, axis=1)
+
+        # 성형 (3)
+        out = out.reshape(N, out_h, out_w, C).transpose(0, 3, 1, 2)
+
+        return out
+```
+
+풀링 계층 구현은 [그림 7-22]와 같이 다음의 세 단계로 진행한다.  
+1. 입력 데이터를 저낵한다. 
+2. 행별 최댓값을 구한다.
+3. 적절한 모양으로 성형한다.  
+
+앞의 코드에서와같이 각 단계는 한두 줄 정도로 간단히 구현된다.  
+
+
+## 7.5 CNN 구현하기
 
 
 
